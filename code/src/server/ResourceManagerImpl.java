@@ -323,6 +323,14 @@ public class ResourceManagerImpl implements server.ws.ResourceManager {
         Trace.info("RM::newCustomer(" + id + ") OK: " + customerId);
         return customerId;
     }
+    
+    public int newCustomId(int id, int customerId) {
+        Trace.info("INFO: RM::newCustomId with chosen ID by customer RM (" + customerId + ").");
+        Customer cust = new Customer(customerId);
+        writeData(id, cust.getKey(), cust);
+        Trace.info("RM::newCustomId(" + customerId + ") OK ");
+        return customerId;
+    }
 
     // This method makes testing easier.
     @Override

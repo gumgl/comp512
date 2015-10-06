@@ -67,7 +67,11 @@ public class ConnectionWithClient extends Thread
             break;
             
         case 5:  //new Customer
-            //TODO: toReturn = Integer.toString(rManager.newCustomer(getInt(args[1])));
+            toReturn = mainClass.customerRMconnection.functionCall(message);
+            String customMessage = "newcustomid,1,"+toReturn;
+            mainClass.carRMconnection.functionCall(customMessage);
+            mainClass.airplaneRMconnection.functionCall(customMessage);
+            mainClass.hotelRMconnection.functionCall(customMessage);
             break;
             
         case 6: //delete Flight
@@ -83,7 +87,10 @@ public class ConnectionWithClient extends Thread
             break;
             
         case 9: //delete Customer
-            //TODO: String toString = Boolean.toString(rManager.deleteCustomer(getInt(args[1]), getInt(args[2])));
+        	toReturn = mainClass.customerRMconnection.functionCall(message);
+            mainClass.carRMconnection.functionCall(message);
+            mainClass.airplaneRMconnection.functionCall(message);
+            mainClass.hotelRMconnection.functionCall(message);
             break;
             
         case 10: //querying a flight
@@ -99,7 +106,9 @@ public class ConnectionWithClient extends Thread
             break;
             
         case 13: //querying Customer Information
-            //TODO: toReturn = rManager.queryCustomerInfo(getInt(args[1]), getInt(args[2]));
+        	toReturn = mainClass.carRMconnection.functionCall(message)
+              + mainClass.airplaneRMconnection.functionCall(message)
+              + mainClass.hotelRMconnection.functionCall(message);
             break;               
             
         case 14: //querying a flight Price
@@ -115,15 +124,15 @@ public class ConnectionWithClient extends Thread
             break;
             
         case 17:  //reserve a flight
-            toReturn = mainClass.airplaneRMconnection.functionCall(message);
+        	toReturn = mainClass.airplaneRMconnection.functionCall(message);
             break;
             
         case 18:  //reserve a car
-            toReturn = mainClass.carRMconnection.functionCall(message);
+        	toReturn = mainClass.carRMconnection.functionCall(message);
             break;
             
         case 19:  //reserve a room
-            toReturn = mainClass.hotelRMconnection.functionCall(message);
+        	toReturn = mainClass.hotelRMconnection.functionCall(message);
             break;
             
         case 20:  //reserve an Itinerary
@@ -131,7 +140,11 @@ public class ConnectionWithClient extends Thread
             break;
             
         case 22:  //new Customer given id
-            //TODO: toReturn = Boolean.toString(rManager.newCustomerId(getInt(args[1]), getInt(args[2])));
+        	toReturn = mainClass.customerRMconnection.functionCall(message);
+            customMessage = "newcustom,1,"+toReturn;
+            mainClass.carRMconnection.functionCall(customMessage);
+            mainClass.airplaneRMconnection.functionCall(customMessage);
+            mainClass.hotelRMconnection.functionCall(customMessage);
             break;
             
         default:

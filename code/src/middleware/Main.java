@@ -12,6 +12,7 @@ public class Main
 	public RMconnection airplaneRMconnection;
 	public RMconnection carRMconnection;
 	public RMconnection hotelRMconnection;
+	public RMconnection customerRMconnection;
 	
 	ArrayList<ConnectionWithClient> clientConnections = new ArrayList<ConnectionWithClient>();
 	
@@ -33,6 +34,11 @@ public class Main
 	public void loadHotelRMconnection(String host, int port) throws Exception
 	{
 		hotelRMconnection = new RMconnection(host, port);
+	}
+	
+	public void loadCustomerRMconnection(String host, int port) throws Exception
+	{
+		customerRMconnection = new RMconnection(host, port);
 	}
 	
 	public static void main(String[] args) throws Exception
@@ -60,6 +66,10 @@ public class Main
 		System.out.println("HotelRM: <service-IP>,<service-port>");
 		connectionInfo = scanner.nextLine().split(",");
 		middleware.loadHotelRMconnection(connectionInfo[0], Integer.parseInt(connectionInfo[1]));
+		
+		System.out.println("CustomerRM: <service-IP>,<service-port>");
+		connectionInfo = scanner.nextLine().split(",");
+		middleware.loadCustomerRMconnection(connectionInfo[0], Integer.parseInt(connectionInfo[1]));
 		
 		System.out.println("Waiting for connection...");
 		

@@ -126,6 +126,8 @@ public class Main
             return 21;
         else if (argument.compareToIgnoreCase("newcustomerid") == 0)
             return 22;
+        else if (argument.compareToIgnoreCase("newcustomid") == 0)
+            return 23;
         else
             return 666;
     }
@@ -214,6 +216,11 @@ public class Main
             
         case 22:  //new Customer given id
             toReturn = Boolean.toString(rManager.newCustomerId(getInt(args[1]), getInt(args[2])));
+            break;
+            
+        case 23:  //new Customer with custom id
+        	rManager.newCustomId(getInt(args[1]), getInt(args[2]));
+            //toReturn = getInt(args[2]) + "";
             break;
             
         default:
