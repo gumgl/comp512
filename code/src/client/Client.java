@@ -1,38 +1,41 @@
 package client;
 
+import server.SocketResourceManager;
+import server.sockets.RMI;
+
+import java.net.InetAddress;
+import java.net.Socket;
 import java.util.*;
 import java.io.*;
 
 
-public class Client extends WSClient {
+public class Client {
 
-    public Client(String serviceName, String serviceHost, int servicePort) 
+    server.ws.ResourceManager proxy;
+
+    public Client(InetAddress host, int port)
     throws Exception {
-        super(serviceName, serviceHost, servicePort);
+        proxy = new SocketResourceManager(host, port);
     }
 
     public static void main(String[] args) {
         try {
         
-            if (args.length != 3) {
-                System.out.println("Usage: MyClient <service-name> " 
-                        + "<service-host> <service-port>");
+            if (args.length != 2) {
+                System.out.println("Usage: MyClient <host> <port>");
                 System.exit(-1);
             }
-            
-            String serviceName = args[0];
-            String serviceHost = args[1];
-            int servicePort = Integer.parseInt(args[2]);
-            
-            Client client = new Client(serviceName, serviceHost, servicePort);
-            
+
+            InetAddress host = InetAddress.getByName(args[0]);
+            int port = Integer.parseInt(args[1]);
+
+            Client client = new Client(host, port);
             client.run();
             
         } catch(Exception e) {
             e.printStackTrace();
         }
     }
-
 
     public void run() {
     
