@@ -1,9 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="help" name="project">
+<project basedir="/Users/Yousuf/Google~1/Courses/COMP512/TA/Fall15/p1/solution" default="help" name="project">
 
     <property name="service.name" value="rm"/>
     <property name="service.host" value="localhost"/>
     <property name="service.port" value="8080"/>
+
+    <property name="server.src" value="${basedir}/src/server"/>
+    <property name="middleware.src" value="${basedir}/src/middleware"/>
 
     <path id="jaxws.classpath">
         <pathelement location="${java.home}/../lib/tools.jar"/>
@@ -14,6 +17,7 @@
     </path>
 
     <target name="clean">
+        <echo message="${basedir}"/>
         <delete dir="${basedir}/build" includeEmptyDirs="true"/>
     </target>
 
@@ -24,14 +28,13 @@
         <mkdir dir="${basedir}/webapps"/>
     </target>
 
-    <taskdef name="annotationProcessing" 
-             classname="com.sun.tools.ws.ant.AnnotationProcessingTask">
+    <taskdef name="annotationProcessing"
+            classname="com.sun.tools.ws.ant.AnnotationProcessingTask">
         <classpath refid="jaxws.classpath"/>
     </taskdef>
 
     <target name="build-server" depends="setup">
         <annotationProcessing
-                fork="true"
                 debug="true"
                 verbose="${verbose}"
                 destdir="${basedir}/build/classes"
@@ -47,34 +50,39 @@
         </annotationProcessing>
     </target>
 
-    <target name="create-war">
-        <war 
-            warfile="${basedir}/build/war/${service.name}.war" 
-            webxml="etc/web.xml">
-            <webinf dir="${basedir}/etc" includes="sun-jaxws.xml"/>
-            <zipfileset
-                    dir="${basedir}/etc"
-                    includes="*.wsdl, *.xsd"
-                    prefix="WEB-INF/wsdl"/>
+    <target name="create-server-war">
+        <war
+                warfile="${basedir}/build/war/${service.name}.war"
+                webxml="${server.src}/ws/web.xml">
+            <webinf dir="${server.src}/ws" includes="sun-jaxws.xml"/>
             <classes dir="${basedir}/build/classes"/>
         </war>
     </target>
 
     <target name="deploy-war">
-        <delete dir="${basedir}/webapps/${service.name}" 
-            includeEmptyDirs="true"/>
-        <mkdir dir="${basedir}/webapps/${service.name}"/>        
-        <unzip 
-            src="${basedir}/build/war/${service.name}.war"
-            dest="${basedir}/webapps/${service.name}"/>
+        <delete dir="${basedir}/webapps/${service.name}"
+                includeEmptyDirs="true"/>
+        <mkdir dir="${basedir}/webapps/${service.name}"/>
+        <unzip
+                src="${basedir}/build/war/${service.name}.war"
+                dest="${basedir}/webapps/${service.name}"/>
     </target>
-    
-    <target name="start-tomcat">
+
+    <target name="build-main">
+        <javac
+                srcdir="${basedir}/src"
+                destdir="${basedir}/build"
+                includes="tomcat/**">
+            <classpath refid="jaxws.classpath"/>
+        </javac>
+    </target>
+
+    <target name="start-tomcat" depends="build-main">
         <echo message="Starting Tomcat and deploying service ... "/>
-        <java fork="true" classname="server.ws.Main">
+        <java fork="true" classname="tomcat.Main">
             <classpath>
                 <path refid="jaxws.classpath"/>
-                <pathelement location="${basedir}/build/classes"/>
+                <pathelement location="${basedir}/build"/>
             </classpath>
             <jvmarg value="-Djava.security.policy=${basedir}/etc/server.policy"/>
             <arg value="${service.name}"/>
@@ -84,11 +92,10 @@
     </target>
 
     <target name="server" depends="setup">
-        <antcall target="clean"/>
         <antcall target="build-server"/>
-        <antcall target="create-war"/>
+        <antcall target="create-server-war"/>
         <antcall target="deploy-war"/>
-        <antcall target="start-tomcat"/>        
+        <antcall target="start-tomcat"/>
     </target>
 
     <taskdef name="wsimport" classname="com.sun.tools.ws.ant.WsImport">
@@ -107,7 +114,6 @@
 
     <target name="build-client" depends="generate-client">
         <javac
-                fork="true"
                 srcdir="${basedir}/src"
                 destdir="${basedir}/build/classes"
                 includes="client/**">
@@ -115,7 +121,7 @@
         </javac>
     </target>
 
-    <target name="client" depends="build-client">
+    <target name="client">
         <java classname="client.Client">
             <classpath>
                 <path refid="jaxws.classpath"/>
@@ -131,5 +137,40 @@
         <echo message="server:  Builds and deploys the service"/>
         <echo message="client:  Builds and runs the client"/>
     </target>
-    
+
+
+    <target name="build-middleware" depends="setup">
+        <annotationProcessing
+                debug="true"
+                verbose="${verbose}"
+                destdir="${basedir}/build/classes"
+                srcdir="${basedir}/src"
+                includes="middleware/**"
+                sourceDestDir="${basedir}/build/classes"
+                procOnly="false"
+                sourcepath="${basedir}/src">
+            <classpath>
+                <path refid="jaxws.classpath"/>
+                <pathelement location="${basedir}/src"/>
+            </classpath>
+        </annotationProcessing>
+    </target>
+
+    <target name="create-middleware-war">
+        <war
+                warfile="${basedir}/build/war/${service.name}.war"
+                webxml="${middleware.src}/ws/web.xml">
+            <webinf dir="${middleware.src}/ws" includes="sun-jaxws.xml"/>
+            <classes dir="${basedir}/build/classes"/>
+        </war>
+    </target>
+
+    <target name="middleware" depends="setup">
+        <antcall target="build-middleware"/>
+        <antcall target="create-middleware-war"/>
+        <antcall target="deploy-war"/>
+        <antcall target="start-tomcat"/>
+    </target>
+
+
 </project>

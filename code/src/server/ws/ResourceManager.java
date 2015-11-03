@@ -21,7 +21,7 @@ import javax.jws.WebService;
 import javax.jws.WebMethod;
 
 
-@WebService
+@WebService(targetNamespace = "http://ns")
 public interface ResourceManager {
     
     // Flight operations //
@@ -138,5 +138,5 @@ public interface ResourceManager {
     @WebMethod
     public boolean reserveItinerary(int id, int customerId, Vector flightNumbers, 
                                     String location, boolean car, boolean room);
-    			
+
 }
