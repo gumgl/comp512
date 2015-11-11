@@ -8,6 +8,9 @@ import java.net.*;
 import java.io.*;
 import java.util.Arrays;
 
+/*
+ * This class will pass the RMIs received from a socket connection to a ResourceManager;
+ */
 public class RMIReceiver implements Runnable {
     Socket clientSocket;
     ObjectInputStream inStream;

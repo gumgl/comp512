@@ -6,6 +6,10 @@ import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
 
+/*
+ * Helper class for SocketResourceManager
+ */
+
 public class RMISender {
 
     Socket serverSocket;
@@ -13,19 +17,22 @@ public class RMISender {
     ObjectInputStream inStream;
 
     public RMISender(InetAddress host, int port) {
-        try {
-            System.out.println("Connecting to server...");
-            serverSocket = new Socket(host, port);
-            System.out.println("Connected!");
-            outStream = new ObjectOutputStream(serverSocket.getOutputStream());
-            System.out.println("OutputStream created");
-            outStream.flush();
-            System.out.println("OutputStream flushed");
-            inStream = new ObjectInputStream(serverSocket.getInputStream());
+        while(true) {
+            try {
+                System.out.printf("Connecting to server %s:%d...\n",host.toString(),port);
+                serverSocket = new Socket(host, port);
+                System.out.println("Connected!");
+                outStream = new ObjectOutputStream(serverSocket.getOutputStream());
+                System.out.println("OutputStream created");
+                outStream.flush();
+                System.out.println("OutputStream flushed");
+                inStream = new ObjectInputStream(serverSocket.getInputStream());
 
-        } catch(Exception e) {
-            System.err.println("Failed to connect to server");
-            e.printStackTrace();
+                break; // Successful connection, break out of loop
+
+            } catch(IOException e){
+                System.err.println("Failed to connect to server, trying again...");
+            }
         }
     }
 

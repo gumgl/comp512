@@ -8,45 +8,32 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class Server implements Runnable {
+public abstract class Server implements Runnable {
     ServerSocket serverSocket;
+    ExecutorService executorService;
     RMIReceiver receiver;
     ResourceManager rm;
-    ExecutorService executorService;
 
-    public static void main(String[] args)
-            throws Exception {
-
-        if (args.length != 2) {
-            System.out.println(
-                    "Usage: MyServer <host> <port>");
-            System.exit(-1);
-        }
-
-        InetAddress host = InetAddress.getByName(args[0]);
-        int port = Integer.parseInt(args[1]);
-
-        System.out.println("hello from Server main?");
-
-        Server server = new Server(host, port);
-        server.run();
-    }
-
-    public Server(InetAddress host, int port) throws IOException {
+    public Server(int port) throws IOException {
         serverSocket = new ServerSocket(port);
-        rm = new ResourceManagerImpl();
         executorService = Executors.newFixedThreadPool(4);
     }
+
+    abstract ResourceManager setupResourceManager();
 
     // Accept an incoming socket connection
     @Override
     public void run() {
+        // Different types of servers have different RMs
+        rm = setupResourceManager();
+
         while (true) {
             try {
-                System.out.println("Waiting for a client to connect...");
+                System.out.println("Waiting for a connection over sockets...");
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Connection found!");
                 receiver = new RMIReceiver(clientSocket, rm);
@@ -56,4 +43,5 @@ public class Server implements Runnable {
             }
         }
     }
+
 }

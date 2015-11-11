@@ -15,8 +15,10 @@ import java.util.Calendar;
 import java.util.Enumeration;
 import java.util.Vector;
 
+/*
+ * This class will forward all RM calls to a socket connection and return the result
+ */
 
-// A ResourceManager Implementation for the client over sockets
 public class SocketResourceManager implements server.ws.ResourceManager {
 
     protected RMISender sender;
