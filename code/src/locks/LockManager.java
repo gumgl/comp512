@@ -3,7 +3,6 @@ package locks;
 import java.util.BitSet;
 import java.util.Vector;
 
-//TODO: Modify the lock manager so that it can convert locks (Task 1)
 public class LockManager
 {
     public static final int READ = 0;
@@ -65,6 +64,12 @@ public class LockManager
                             // lock conversion 
                             // *** ADD CODE HERE *** to carry out the lock conversion in the
                             // lock table
+                        	TrxnObj trxnObjR = new TrxnObj(xid, strData, TrxnObj.READ);
+                            DataObj dataObjR = new DataObj(xid, strData, DataObj.READ);
+                            this.lockTable.remove(trxnObjR);
+                            this.lockTable.remove(dataObjR);
+                        	this.lockTable.add(trxnObj);
+                        	this.lockTable.add(dataObj);
                         } else {
                             // a lock request that is not lock conversion
                             this.lockTable.add(trxnObj);
@@ -204,6 +209,15 @@ public class LockManager
                     // (2) transaction already had a WRITE lock
                     // Seeing the comments at the top of this function might be helpful
                     // *** ADD CODE HERE *** to take care of both these cases
+                	
+                	if(dataObj2.getLockType() == DataObj.READ)
+                	{
+                		bitset.set(0, true);
+                	}
+                	else
+                	{
+                		throw new RedundantLockRequestException(dataObj.getXId(), "Redundant WRITE lock request");
+                	}
                 }
             } 
             else {
