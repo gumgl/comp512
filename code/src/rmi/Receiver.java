@@ -47,10 +47,10 @@ public class Receiver implements Runnable {
         System.out.println("Received Invocation: " + invocation.toString());
 
         try {
-            // Naive method search going by name and not complete signature (parameter types)
+            // Naive method search going by name and parameter count. Not complete signature (ignores types)
             Method method = null;
             for (Method m : localResource.getClass().getMethods()) { // Search in the RM's methods
-                if (m.getName().equals(invocation.getMethodName())) {
+                if (m.getName().equals(invocation.getMethodName()) && m.getParameterCount() == invocation.getParamCount()) {
                     method = m;
                     break;
                 }

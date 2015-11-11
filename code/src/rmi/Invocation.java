@@ -33,6 +33,9 @@ public class Invocation implements Serializable {
     public void addParam(Object p) {
         params.add(p);
     }
+    public int getParamCount() {
+        return this.params.size();
+    }
 
     public String toString() {
         StringBuilder output = new StringBuilder(methodName + "(");
