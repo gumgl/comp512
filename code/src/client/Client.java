@@ -1,6 +1,6 @@
 package client;
 
-import sockets.SocketResourceManager;
+import server.SocketResourceManager;
 import system.ResourceManager;
 
 import java.net.InetAddress;

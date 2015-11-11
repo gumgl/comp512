@@ -1,10 +1,12 @@
-package sockets;
+package server;
 
 // -------------------------------
 // Adapted from Kevin T. Manley
 // CSE 593
 // -------------------------------
 
+import sockets.RMI;
+import sockets.RMISender;
 import system.ResourceManager;
 
 import java.net.InetAddress;

@@ -7,9 +7,6 @@ import java.util.Calendar;
 import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
-/**
- * Created by Guillaume on 2015-11-10.
- */
 public class MiddleWareResourceManager implements ResourceManager {
 
     ResourceManager flightRM;

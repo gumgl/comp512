@@ -5,17 +5,17 @@ import java.net.*;
 import java.io.*;
 
 /*
- * This class will pass the RMIs received from a socket connection to a ResourceManager;
+ * This class will pass the RMIs received from a socket connection to the localResource object;
  */
 public class RMIReceiver implements Runnable {
     Socket clientSocket;
     ObjectInputStream inStream;
     ObjectOutputStream outputStream;
-    ResourceManager rm;
+    Object localResource;
 
-    public RMIReceiver(Socket clientSocket, ResourceManager rm) {
+    public RMIReceiver(Socket clientSocket, Object localResource) {
         this.clientSocket = clientSocket;
-        this.rm = rm;
+        this.localResource = localResource;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class RMIReceiver implements Runnable {
         try {
             // Naive method search going by name and not complete signature (parameter types)
             Method method = null;
-            for (Method m : rm.getClass().getMethods()) { // Search in the RM's methods
+            for (Method m : localResource.getClass().getMethods()) { // Search in the RM's methods
                 if (m.getName().equals(rmi.getMethodName())) {
                     method = m;
                     break;
@@ -59,7 +59,7 @@ public class RMIReceiver implements Runnable {
                 throw new NoSuchMethodException();
 
             // Method m = rm.getClass().getDeclaredMethod(rmi.getMethodName()); // Does not work because we don't know the types
-            Object result = method.invoke(rm, rmi.getParams().toArray());
+            Object result = method.invoke(localResource, rmi.getParams().toArray());
             return new RMIResponse(result);
         } catch (NoSuchMethodException e) {
             System.err.println("Method not found");

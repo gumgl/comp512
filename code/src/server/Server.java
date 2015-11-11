@@ -1,5 +1,6 @@
-package sockets;
+package server;
 
+import sockets.RMIReceiver;
 import system.ResourceManager;
 
 import java.io.IOException;
