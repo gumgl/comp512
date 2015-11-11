@@ -5,8 +5,7 @@ package sockets;
 // CSE 593
 // -------------------------------
 
-import sockets.RMI;
-import sockets.RMISender;
+import system.ResourceManager;
 
 import java.net.InetAddress;
 import java.util.Vector;
@@ -15,7 +14,7 @@ import java.util.Vector;
  * This class will forward all RM calls to a socket connection and return the result
  */
 
-public class SocketResourceManager implements server.ws.ResourceManager {
+public class SocketResourceManager implements ResourceManager {
 
     protected RMISender sender;
 

@@ -14,7 +14,7 @@
  * has succeeded.
  */
 
-package server.ws;
+package system;
 
 import java.util.*;
 import javax.jws.WebService;

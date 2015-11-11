@@ -1,8 +1,12 @@
-package sockets;
+package server;
 
 
-import server.*;
-import server.ws.ResourceManager;
+import system.ResourceManager;
+import sockets.Server;
+import system.Car;
+import system.Flight;
+import system.ResourceManagerImpl;
+import system.Room;
 
 import java.io.IOException;
 
@@ -42,7 +46,7 @@ public class RMServer extends Server {
     }
 
     @Override
-    ResourceManager setupResourceManager() {
+    protected ResourceManager setupResourceManager() {
         return new ResourceManagerImpl();
     }
 }

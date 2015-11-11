@@ -3,15 +3,17 @@
 // CSE 593
 // -------------------------------
 
-package server;
+package system;
+
+import server.Trace;
 
 import java.util.*;
 import javax.jws.WebService;
 
 
 @WebService(targetNamespace = "http://ns",
-        endpointInterface = "server.ws.ResourceManager")
-public class ResourceManagerImpl implements server.ws.ResourceManager {
+        endpointInterface = "system.ResourceManager")
+public class ResourceManagerImpl implements ResourceManager {
 
     protected RMHashtable m_itemHT = new RMHashtable();
 

@@ -3,7 +3,7 @@
 // CSE 593
 // -------------------------------
 
-package server;
+package system;
 
 
 // Represents a customer's "reserved item" (e.g. Flight, Car, or Room).

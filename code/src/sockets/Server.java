@@ -1,6 +1,6 @@
 package sockets;
 
-import server.ws.ResourceManager;
+import system.ResourceManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;

@@ -2,7 +2,7 @@ package middleware;
 
 import sockets.SocketResourceManager;
 import sockets.Server;
-import server.ws.ResourceManager;
+import system.ResourceManager;
 
 import java.io.IOException;
 import java.net.*;

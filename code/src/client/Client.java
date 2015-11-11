@@ -1,6 +1,7 @@
 package client;
 
 import sockets.SocketResourceManager;
+import system.ResourceManager;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -9,7 +10,7 @@ import java.io.*;
 
 public class Client {
 
-    server.ws.ResourceManager proxy;
+    ResourceManager proxy;
 
     public Client(InetAddress host, int port)
     throws Exception {

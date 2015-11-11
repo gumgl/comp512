@@ -63,7 +63,7 @@
 
     <target name="server" depends="build-server">
         <property name="type" value="flight" />
-        <java classname="sockets.RMServer">
+        <java classname="server.RMServer">
             <classpath>
                 <pathelement location="${basedir}/build/server"/>
             </classpath>
