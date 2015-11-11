@@ -48,4 +48,9 @@ public class RMServer extends Server {
     protected ResourceManager setupResourceManager() {
         return new LocalResourceManager();
     }
+
+    @Override
+    public boolean shutdown() {
+        return false;
+    }
 }

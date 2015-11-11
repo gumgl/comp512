@@ -37,7 +37,6 @@ public class Client {
     }
 
     public void run() {
-    
         int id;
         int flightNumber;
         int flightPrice;
@@ -62,6 +61,11 @@ public class Client {
         
             try {
                 //read the next command
+                /*if (transactionId == 0)
+                    System.out.printf("[X] ");
+                else
+                    System.out.printf("[T%d] ",transactionId);*/
+                System.out.printf(">");
                 command = stdin.readLine();
             }
             catch (IOException io) {
@@ -71,7 +75,8 @@ public class Client {
             //remove heading and trailing white space
             command = command.trim();
             arguments = parse(command);
-            
+
+            //TODO: Refactor the try/catch and better handle IOExceptions
             //decide which of the commands this was
             switch(findChoice((String) arguments.elementAt(0))) {
 
@@ -560,7 +565,54 @@ public class Client {
                     e.printStackTrace();
                 }
                 break;
-                
+            case 23: { //start transaction
+                if (arguments.size() != 1) {
+                    wrongNumber();
+                    break;
+                }
+                System.out.printf("Starting a transaction with id...");
+                int transactionId = proxy.start();
+                System.out.printf("%d.Done.\n", transactionId);
+                break;
+            }
+            case 24: { //commit transaction
+                if (arguments.size() != 2) {
+                    wrongNumber();
+                    break;
+                }
+                try {
+                    int transactionId = getInt(arguments.elementAt(1));
+                    boolean success = proxy.commit(transactionId);
+                    if (success)
+                        System.out.printf("Transaction %d committed.\n", transactionId);
+                    else
+                        System.out.printf("Commit failed for transaction %d.\n", transactionId);
+                } catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
+                break;
+            }
+            case 25: { //abort transaction
+                if (arguments.size() != 2) {
+                    wrongNumber();
+                    break;
+                }
+                try {
+                    int transactionId = getInt(arguments.elementAt(1));
+                    boolean success = proxy.commit(transactionId);
+                    if (success)
+                        System.out.printf("Transaction %d aborted.\n", transactionId);
+                    else
+                        System.out.printf("Abort failed for transaction %d.\n", transactionId);
+                } catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
+                break;
+            }
             default:
                 System.out.println("The interface does not support this command.");
                 break;
@@ -625,6 +677,12 @@ public class Client {
             return 21;
         else if (argument.compareToIgnoreCase("newcustomerid") == 0)
             return 22;
+        else if (argument.compareToIgnoreCase("start") == 0)
+            return 22;
+        else if (argument.compareToIgnoreCase("commit") == 0)
+            return 22;
+        else if (argument.compareToIgnoreCase("abort") == 0)
+            return 22;
         else
             return 666;
     }
@@ -637,6 +695,7 @@ public class Client {
         System.out.println("deletecustomer\nqueryflight\nquerycar\nqueryroom\nquerycustomer");
         System.out.println("queryflightprice\nquerycarprice\nqueryroomprice");
         System.out.println("reserveflight\nreservecar\nreserveroom\nitinerary");
+        System.out.println("start\ncommit\nabort");
         System.out.println("quit");
         System.out.println("\ntype help, <commandname> for detailed info (note the use of comma).");
     }
@@ -646,182 +705,206 @@ public class Client {
         System.out.print("Help on: ");
         switch(findChoice(command)) {
             case 1:
-            System.out.println("Help");
-            System.out.println("\nTyping help on the prompt gives a list of all the commands available.");
-            System.out.println("Typing help, <commandname> gives details on how to use the particular command.");
-            break;
+                System.out.println("Help");
+                System.out.println("\nTyping help on the prompt gives a list of all the commands available.");
+                System.out.println("Typing help, <commandname> gives details on how to use the particular command.");
+                break;
 
             case 2:  //new flight
-            System.out.println("Adding a new Flight.");
-            System.out.println("Purpose: ");
-            System.out.println("\tAdd information about a new flight.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tnewflight, <id>, <flightnumber>, <numSeats>, <flightprice>");
-            break;
+                System.out.println("Adding a new Flight.");
+                System.out.println("Purpose: ");
+                System.out.println("\tAdd information about a new flight.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tnewflight, <id>, <flightnumber>, <numSeats>, <flightprice>");
+                break;
             
             case 3:  //new car
-            System.out.println("Adding a new car.");
-            System.out.println("Purpose: ");
-            System.out.println("\tAdd information about a new car location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tnewcar, <id>, <location>, <numberofcars>, <pricepercar>");
-            break;
+                System.out.println("Adding a new car.");
+                System.out.println("Purpose: ");
+                System.out.println("\tAdd information about a new car location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tnewcar, <id>, <location>, <numberofcars>, <pricepercar>");
+                break;
             
             case 4:  //new room
-            System.out.println("Adding a new room.");
-            System.out.println("Purpose: ");
-            System.out.println("\tAdd information about a new room location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tnewroom, <id>, <location>, <numberofrooms>, <priceperroom>");
-            break;
+                System.out.println("Adding a new room.");
+                System.out.println("Purpose: ");
+                System.out.println("\tAdd information about a new room location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tnewroom, <id>, <location>, <numberofrooms>, <priceperroom>");
+                break;
             
             case 5:  //new Customer
-            System.out.println("Adding a new Customer.");
-            System.out.println("Purpose: ");
-            System.out.println("\tGet the system to provide a new customer id. (same as adding a new customer)");
-            System.out.println("\nUsage: ");
-            System.out.println("\tnewcustomer, <id>");
-            break;
+                System.out.println("Adding a new Customer.");
+                System.out.println("Purpose: ");
+                System.out.println("\tGet the system to provide a new customer id. (same as adding a new customer)");
+                System.out.println("\nUsage: ");
+                System.out.println("\tnewcustomer, <id>");
+                break;
             
             
             case 6: //delete Flight
-            System.out.println("Deleting a flight");
-            System.out.println("Purpose: ");
-            System.out.println("\tDelete a flight's information.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tdeleteflight, <id>, <flightnumber>");
-            break;
+                System.out.println("Deleting a flight");
+                System.out.println("Purpose: ");
+                System.out.println("\tDelete a flight's information.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tdeleteflight, <id>, <flightnumber>");
+                break;
             
             case 7: //delete car
-            System.out.println("Deleting a car");
-            System.out.println("Purpose: ");
-            System.out.println("\tDelete all cars from a location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tdeletecar, <id>, <location>, <numCars>");
-            break;
+                System.out.println("Deleting a car");
+                System.out.println("Purpose: ");
+                System.out.println("\tDelete all cars from a location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tdeletecar, <id>, <location>, <numCars>");
+                break;
             
             case 8: //delete room
-            System.out.println("Deleting a room");
-            System.out.println("\nPurpose: ");
-            System.out.println("\tDelete all rooms from a location.");
-            System.out.println("Usage: ");
-            System.out.println("\tdeleteroom, <id>, <location>, <numRooms>");
-            break;
+                System.out.println("Deleting a room");
+                System.out.println("\nPurpose: ");
+                System.out.println("\tDelete all rooms from a location.");
+                System.out.println("Usage: ");
+                System.out.println("\tdeleteroom, <id>, <location>, <numRooms>");
+                break;
             
             case 9: //delete Customer
-            System.out.println("Deleting a Customer");
-            System.out.println("Purpose: ");
-            System.out.println("\tRemove a customer from the database.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tdeletecustomer, <id>, <customerid>");
-            break;
+                System.out.println("Deleting a Customer");
+                System.out.println("Purpose: ");
+                System.out.println("\tRemove a customer from the database.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tdeletecustomer, <id>, <customerid>");
+                break;
             
             case 10: //querying a flight
-            System.out.println("Querying flight.");
-            System.out.println("Purpose: ");
-            System.out.println("\tObtain Seat information about a certain flight.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tqueryflight, <id>, <flightnumber>");
-            break;
+                System.out.println("Querying flight.");
+                System.out.println("Purpose: ");
+                System.out.println("\tObtain Seat information about a certain flight.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tqueryflight, <id>, <flightnumber>");
+                break;
             
             case 11: //querying a car Location
-            System.out.println("Querying a car location.");
-            System.out.println("Purpose: ");
-            System.out.println("\tObtain number of cars at a certain car location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tquerycar, <id>, <location>");        
-            break;
+                System.out.println("Querying a car location.");
+                System.out.println("Purpose: ");
+                System.out.println("\tObtain number of cars at a certain car location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tquerycar, <id>, <location>");
+                break;
             
             case 12: //querying a room location
-            System.out.println("Querying a room Location.");
-            System.out.println("Purpose: ");
-            System.out.println("\tObtain number of rooms at a certain room location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tqueryroom, <id>, <location>");        
-            break;
+                System.out.println("Querying a room Location.");
+                System.out.println("Purpose: ");
+                System.out.println("\tObtain number of rooms at a certain room location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tqueryroom, <id>, <location>");
+                break;
             
             case 13: //querying Customer Information
-            System.out.println("Querying Customer Information.");
-            System.out.println("Purpose: ");
-            System.out.println("\tObtain information about a customer.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tquerycustomer, <id>, <customerid>");
-            break;               
+                System.out.println("Querying Customer Information.");
+                System.out.println("Purpose: ");
+                System.out.println("\tObtain information about a customer.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tquerycustomer, <id>, <customerid>");
+                break;
             
             case 14: //querying a flight for price 
-            System.out.println("Querying flight.");
-            System.out.println("Purpose: ");
-            System.out.println("\tObtain price information about a certain flight.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tqueryflightprice, <id>, <flightnumber>");
-            break;
+                System.out.println("Querying flight.");
+                System.out.println("Purpose: ");
+                System.out.println("\tObtain price information about a certain flight.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tqueryflightprice, <id>, <flightnumber>");
+                break;
             
             case 15: //querying a car Location for price
-            System.out.println("Querying a car location.");
-            System.out.println("Purpose: ");
-            System.out.println("\tObtain price information about a certain car location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tquerycarprice, <id>, <location>");        
-            break;
+                System.out.println("Querying a car location.");
+                System.out.println("Purpose: ");
+                System.out.println("\tObtain price information about a certain car location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tquerycarprice, <id>, <location>");
+                break;
             
             case 16: //querying a room location for price
-            System.out.println("Querying a room Location.");
-            System.out.println("Purpose: ");
-            System.out.println("\tObtain price information about a certain room location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tqueryroomprice, <id>, <location>");        
-            break;
+                System.out.println("Querying a room Location.");
+                System.out.println("Purpose: ");
+                System.out.println("\tObtain price information about a certain room location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tqueryroomprice, <id>, <location>");
+                break;
 
             case 17:  //reserve a flight
-            System.out.println("Reserving a flight.");
-            System.out.println("Purpose: ");
-            System.out.println("\tReserve a flight for a customer.");
-            System.out.println("\nUsage: ");
-            System.out.println("\treserveflight, <id>, <customerid>, <flightnumber>");
-            break;
+                System.out.println("Reserving a flight.");
+                System.out.println("Purpose: ");
+                System.out.println("\tReserve a flight for a customer.");
+                System.out.println("\nUsage: ");
+                System.out.println("\treserveflight, <id>, <customerid>, <flightnumber>");
+                break;
             
             case 18:  //reserve a car
-            System.out.println("Reserving a car.");
-            System.out.println("Purpose: ");
-            System.out.println("\tReserve a given number of cars for a customer at a particular location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\treservecar, <id>, <customerid>, <location>, <nummberofcars>");
-            break;
+                System.out.println("Reserving a car.");
+                System.out.println("Purpose: ");
+                System.out.println("\tReserve a given number of cars for a customer at a particular location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\treservecar, <id>, <customerid>, <location>, <nummberofcars>");
+                break;
             
             case 19:  //reserve a room
-            System.out.println("Reserving a room.");
-            System.out.println("Purpose: ");
-            System.out.println("\tReserve a given number of rooms for a customer at a particular location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\treserveroom, <id>, <customerid>, <location>, <nummberofrooms>");
-            break;
+                System.out.println("Reserving a room.");
+                System.out.println("Purpose: ");
+                System.out.println("\tReserve a given number of rooms for a customer at a particular location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\treserveroom, <id>, <customerid>, <location>, <nummberofrooms>");
+                break;
             
             case 20:  //reserve an Itinerary
-            System.out.println("Reserving an Itinerary.");
-            System.out.println("Purpose: ");
-            System.out.println("\tBook one or more flights.Also book zero or more cars/rooms at a location.");
-            System.out.println("\nUsage: ");
-            System.out.println("\titinerary, <id>, <customerid>, "
-                    + "<flightnumber1>....<flightnumberN>, "
-                    + "<LocationToBookcarsOrrooms>, <NumberOfcars>, <NumberOfroom>");
-            break;
+                System.out.println("Reserving an Itinerary.");
+                System.out.println("Purpose: ");
+                System.out.println("\tBook one or more flights.Also book zero or more cars/rooms at a location.");
+                System.out.println("\nUsage: ");
+                System.out.println("\titinerary, <id>, <customerid>, "
+                        + "<flightnumber1>....<flightnumberN>, "
+                        + "<LocationToBookcarsOrrooms>, <NumberOfcars>, <NumberOfroom>");
+                break;
             
 
             case 21:  //quit the client
-            System.out.println("Quitting client.");
-            System.out.println("Purpose: ");
-            System.out.println("\tExit the client application.");
-            System.out.println("\nUsage: ");
-            System.out.println("\tquit");
-            break;
-            
+                System.out.println("Quitting client.");
+                System.out.println("Purpose: ");
+                System.out.println("\tExit the client application.");
+                System.out.println("\nUsage: ");
+                System.out.println("\tquit");
+                break;
+
             case 22:  //new customer with id
-            System.out.println("Create new customer providing an id");
-            System.out.println("Purpose: ");
-            System.out.println("\tCreates a new customer with the id provided");
-            System.out.println("\nUsage: ");
-            System.out.println("\tnewcustomerid, <id>, <customerid>");
-            break;
+                System.out.println("Create new customer providing an id");
+                System.out.println("Purpose: ");
+                System.out.println("\tCreates a new customer with the id provided");
+                System.out.println("\nUsage: ");
+                System.out.println("\tnewcustomerid, <id>, <customerid>");
+                break;
+
+            case 23:  //start transaction
+                System.out.println("Start a new transaction");
+                System.out.println("Purpose: ");
+                System.out.println("\tBundles operations into an atomic transaction");
+                System.out.println("\nUsage: ");
+                System.out.println("\tstart, <id>");
+                break;
+
+            case 24:  //commit transaction
+                System.out.println("Commit the current transaction");
+                System.out.println("Purpose: ");
+                System.out.println("\tPerforms all the operations");
+                System.out.println("\nUsage: ");
+                System.out.println("\tcommit, <id>");
+                break;
+
+            case 25:  //abort transaction
+                System.out.println("Abort the current transaction");
+                System.out.println("Purpose: Cancels all the operations");
+                System.out.println("\t");
+                System.out.println("\nUsage: ");
+                System.out.println("\tabort");
+                break;
 
             default:
             System.out.println(command);

@@ -48,4 +48,9 @@ public class MiddleWareServer extends Server {
                 new SocketResourceManager(RMaddresses.get(1), RMports.get(1)),
                 new SocketResourceManager(RMaddresses.get(2), RMports.get(2)));
     }
+
+    @Override
+    public boolean shutdown() {
+        return false;
+    }
 }

@@ -3,6 +3,7 @@ package locks;
 import java.util.BitSet;
 import java.util.Vector;
 
+//TODO: Modify the lock manager so that it can convert locks (Task 1)
 public class LockManager
 {
     public static final int READ = 0;

@@ -22,7 +22,7 @@ public abstract class Server implements Runnable {
 
     protected abstract ResourceManager setupResourceManager();
 
-    // Accept an incoming socket connection
+    /* Accept an incoming socket connection */
     @Override
     public void run() {
         // Different types of servers have different RMs
@@ -41,4 +41,6 @@ public abstract class Server implements Runnable {
         }
     }
 
+    /* Shutdown gracefully */
+    abstract public boolean shutdown();
 }

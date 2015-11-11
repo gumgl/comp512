@@ -369,4 +369,39 @@ public class SocketResourceManager implements ResourceManager {
         }
     }
 
+    @Override
+    public int start() {
+        try {
+            RMI rmi = new RMI("start");
+            return (Integer) sender.invoke(rmi);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    @Override
+    public boolean commit(int transactionId) {
+        try {
+            RMI rmi = new RMI("commit");
+            rmi.addParam(transactionId);
+            return (Boolean) sender.invoke(rmi);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean abort(int transactionId) {
+        try {
+            RMI rmi = new RMI("abort");
+            rmi.addParam(transactionId);
+            return (Boolean) sender.invoke(rmi);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }
