@@ -13,7 +13,7 @@ import javax.jws.WebService;
 
 @WebService(targetNamespace = "http://ns",
         endpointInterface = "system.ResourceManager")
-public class ResourceManagerImpl implements ResourceManager {
+public class LocalResourceManager implements ResourceManager {
 
     protected RMHashtable m_itemHT = new RMHashtable();
 
@@ -526,6 +526,24 @@ public class ResourceManagerImpl implements ResourceManager {
     @Override
     public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
                                     String location, boolean car, boolean room) {
+        return false;
+    }
+
+    /* Not actually used in this implementation, only in MiddleWareResourceManager */
+    @Override
+    public int start() {
+        return 0;
+    }
+
+    /* Not actually used in this implementation, only in MiddleWareResourceManager */
+    @Override
+    public boolean commit(int transactionId) {
+        return false;
+    }
+
+    /* Not actually used in this implementation, only in MiddleWareResourceManager */
+    @Override
+    public boolean abort(int transactionId) {
         return false;
     }
 }

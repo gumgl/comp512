@@ -4,7 +4,7 @@ package server;
 import system.ResourceManager;
 import system.Car;
 import system.Flight;
-import system.ResourceManagerImpl;
+import system.LocalResourceManager;
 import system.Room;
 
 import java.io.IOException;
@@ -46,6 +46,6 @@ public class RMServer extends Server {
 
     @Override
     protected ResourceManager setupResourceManager() {
-        return new ResourceManagerImpl();
+        return new LocalResourceManager();
     }
 }
