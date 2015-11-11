@@ -1,8 +1,7 @@
-package server.sockets;
+package middleware;
 
-import server.MiddleWareResourceManager;
-import server.ResourceManagerImpl;
-import server.SocketResourceManager;
+import sockets.SocketResourceManager;
+import sockets.Server;
 import server.ws.ResourceManager;
 
 import java.io.IOException;

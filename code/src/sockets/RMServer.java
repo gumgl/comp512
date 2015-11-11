@@ -1,14 +1,10 @@
-package server.sockets;
+package sockets;
 
 
 import server.*;
 import server.ws.ResourceManager;
 
 import java.io.IOException;
-import java.net.InetAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.util.concurrent.Executors;
 
 public class RMServer extends Server {
     public final Class type;

@@ -1,5 +1,6 @@
-package server;
+package middleware;
 
+import server.Trace;
 import server.ws.ResourceManager;
 
 import java.util.Calendar;

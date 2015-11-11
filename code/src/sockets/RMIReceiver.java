@@ -1,12 +1,10 @@
-package server.sockets;
+package sockets;
 
-import server.ResourceManagerImpl;
 import server.ws.ResourceManager;
 
 import java.lang.reflect.Method;
 import java.net.*;
 import java.io.*;
-import java.util.Arrays;
 
 /*
  * This class will pass the RMIs received from a socket connection to a ResourceManager;

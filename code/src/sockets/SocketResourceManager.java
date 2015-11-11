@@ -1,18 +1,14 @@
-package server;
+package sockets;
 
 // -------------------------------
 // Adapted from Kevin T. Manley
 // CSE 593
 // -------------------------------
 
-import server.*;
-import server.sockets.RMI;
-import server.sockets.RMISender;
+import sockets.RMI;
+import sockets.RMISender;
 
-import javax.jws.WebService;
 import java.net.InetAddress;
-import java.util.Calendar;
-import java.util.Enumeration;
 import java.util.Vector;
 
 /*

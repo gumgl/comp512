@@ -63,7 +63,7 @@
 
     <target name="server" depends="build-server">
         <property name="type" value="flight" />
-        <java classname="server.sockets.RMServer">
+        <java classname="sockets.RMServer">
             <classpath>
                 <pathelement location="${basedir}/build/server"/>
             </classpath>
@@ -74,7 +74,7 @@
         </java>
     </target>
     <target name="middleware" depends="build-middleware">
-        <java classname="server.sockets.MiddleWareServer">
+        <java classname="middleware.MiddleWareServer">
             <classpath>
                 <pathelement location="${basedir}/build/middleware"/>
             </classpath>

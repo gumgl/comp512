@@ -1,10 +1,8 @@
 package client;
 
-import server.SocketResourceManager;
-import server.sockets.RMI;
+import sockets.SocketResourceManager;
 
 import java.net.InetAddress;
-import java.net.Socket;
 import java.util.*;
 import java.io.*;
 
