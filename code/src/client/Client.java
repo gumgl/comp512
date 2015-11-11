@@ -1,7 +1,7 @@
 package client;
 
-import server.SocketResourceManager;
-import system.ResourceManager;
+import server.RMIResourceManager;
+import system.IResourceManager;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -10,11 +10,11 @@ import java.io.*;
 
 public class Client {
 
-    ResourceManager proxy;
+    IResourceManager proxy;
 
     public Client(InetAddress host, int port)
     throws Exception {
-        proxy = new SocketResourceManager(host, port);
+        proxy = new RMIResourceManager(host, port);
     }
 
     public static void main(String[] args) {

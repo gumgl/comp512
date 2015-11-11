@@ -1,7 +1,7 @@
 package server;
 
-import sockets.RMIReceiver;
-import system.ResourceManager;
+import rmi.Receiver;
+import system.IResourceManager;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -12,15 +12,15 @@ import java.util.concurrent.Executors;
 public abstract class Server implements Runnable {
     ServerSocket serverSocket;
     ExecutorService executorService;
-    RMIReceiver receiver;
-    ResourceManager rm;
+    Receiver receiver;
+    IResourceManager rm;
 
     public Server(int port) throws IOException {
         serverSocket = new ServerSocket(port);
         executorService = Executors.newFixedThreadPool(4);
     }
 
-    protected abstract ResourceManager setupResourceManager();
+    protected abstract IResourceManager setupResourceManager();
 
     /* Accept an incoming socket connection */
     @Override
@@ -33,7 +33,7 @@ public abstract class Server implements Runnable {
                 System.out.println("Waiting for a connection over sockets...");
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Connection found!");
-                receiver = new RMIReceiver(clientSocket, rm);
+                receiver = new Receiver(clientSocket, rm);
                 executorService.execute(receiver);
             } catch (IOException e) {
                 e.printStackTrace();

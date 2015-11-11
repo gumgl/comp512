@@ -1,13 +1,13 @@
-package sockets;
+package rmi;
 
 import java.io.Serializable;
 
-public class RMIResponse implements Serializable {
+public class Response implements Serializable {
     private Object returnValue;
     private Exception exception = null;
 
-    public static RMIResponse error(Exception e) {
-        return new RMIResponse(false, e);
+    public static Response error(Exception e) {
+        return new Response(false, e);
     }
 
     public Object getReturnValue() {
@@ -18,10 +18,13 @@ public class RMIResponse implements Serializable {
         return exception;
     }
 
-    public RMIResponse(Object returnValue, Exception e) {
+    @Override
+    public String toString() { return returnValue.toString();}
+
+    public Response(Object returnValue, Exception e) {
         this.returnValue = returnValue;
     }
-    public RMIResponse(Object returnValue) {
+    public Response(Object returnValue) {
         this.returnValue = returnValue;
     }
 }

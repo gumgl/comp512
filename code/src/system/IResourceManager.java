@@ -22,7 +22,7 @@ import javax.jws.WebMethod;
 
 
 @WebService
-public interface ResourceManager {
+public interface IResourceManager {
     
     // Flight operations //
     

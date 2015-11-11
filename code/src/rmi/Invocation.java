@@ -1,13 +1,13 @@
-package sockets;
+package rmi;
 
 import java.io.Serializable;
 import java.util.ArrayList;
 
-public class RMI implements Serializable {
+public class Invocation implements Serializable {
     private String methodName;
     private ArrayList<Object> params;
 
-    public RMI(String methodName, ArrayList<Object> params) {
+    public Invocation(String methodName, ArrayList<Object> params) {
         this.methodName = methodName;
         this.params = params;
     }
@@ -20,11 +20,16 @@ public class RMI implements Serializable {
         return params;
     }
 
-    public RMI(String methodName) {
+    public Invocation(String methodName) {
         this.methodName = methodName;
         this.params = new ArrayList<Object>();
     }
 
+    public void setParam(int position, Object p) {
+        if (params.get(position) != null) {
+            params.set(position, p);
+        }
+    }
     public void addParam(Object p) {
         params.add(p);
     }

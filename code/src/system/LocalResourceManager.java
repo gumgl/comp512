@@ -12,8 +12,8 @@ import javax.jws.WebService;
 
 
 @WebService(targetNamespace = "http://ns",
-        endpointInterface = "system.ResourceManager")
-public class LocalResourceManager implements ResourceManager {
+        endpointInterface = "system.IResourceManager")
+public class LocalResourceManager implements IResourceManager {
 
     protected RMHashtable m_itemHT = new RMHashtable();
 

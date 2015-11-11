@@ -1,8 +1,9 @@
 package middleware;
 
-import server.SocketResourceManager;
+import rmi.SocketSender;
+import server.RMIResourceManager;
 import server.Server;
-import system.ResourceManager;
+import system.IResourceManager;
 
 import java.io.IOException;
 import java.net.*;
@@ -40,13 +41,13 @@ public class MiddleWareServer extends Server {
     }
 
     @Override
-    protected ResourceManager setupResourceManager() {
+    protected IResourceManager setupResourceManager() {
         System.out.println("Trying to connect to the ResourceManagers...");
         // the MiddleWareResourceManager will forward all received RMIs to the specific RMs
         return new MiddleWareResourceManager(
-                new SocketResourceManager(RMaddresses.get(0), RMports.get(0)),
-                new SocketResourceManager(RMaddresses.get(1), RMports.get(1)),
-                new SocketResourceManager(RMaddresses.get(2), RMports.get(2)));
+                new RMIResourceManager(new SocketSender(RMaddresses.get(0), RMports.get(0))),
+                new RMIResourceManager(new SocketSender(RMaddresses.get(1), RMports.get(1))),
+                new RMIResourceManager(new SocketSender(RMaddresses.get(2), RMports.get(2))));
     }
 
     @Override

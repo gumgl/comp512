@@ -1,11 +1,8 @@
 package server;
 
 
-import system.ResourceManager;
-import system.Car;
-import system.Flight;
-import system.LocalResourceManager;
-import system.Room;
+import system.*;
+import system.IResourceManager;
 
 import java.io.IOException;
 
@@ -45,7 +42,7 @@ public class RMServer extends Server {
     }
 
     @Override
-    protected ResourceManager setupResourceManager() {
+    protected IResourceManager setupResourceManager() {
         return new LocalResourceManager();
     }
 

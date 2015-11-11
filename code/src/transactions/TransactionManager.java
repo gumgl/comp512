@@ -1,17 +1,30 @@
 package transactions;
 
-import system.ResourceManager;
+import middleware.MiddleWareResourceManager;
+import system.IResourceManager;
 
 import java.util.concurrent.ConcurrentHashMap;
 
 public class TransactionManager {
+    protected final MiddleWareResourceManager middleware;
     private int increment = 1;
 
     private final ConcurrentHashMap<Integer, Transaction> transactions =
             new ConcurrentHashMap<Integer, Transaction>();
 
-    /* Add a ResourceManager to the list of involved RMs */
-    public boolean enlist(int id, ResourceManager rm) {
+    public TransactionManager(MiddleWareResourceManager middleware) {
+        this.middleware = middleware;
+    }
+
+    public Transaction getTransaction(int id) {
+        return transactions.get(id);
+    }
+    public IResourceManager getTransactionBuffer(int id) {
+        return transactions.get(id).rm;
+    }
+
+    /* Add a IResourceManager to the list of involved RMs */
+    public boolean enlist(int id, IResourceManager rm) {
         if (! transactions.containsKey(id))
             return false;
         else
@@ -20,7 +33,7 @@ public class TransactionManager {
 
     /* Start a new transaction and return its id */
     public synchronized int start() {
-        Transaction transaction = new Transaction(increment);
+        Transaction transaction = new Transaction(this, increment);
         transactions.put(increment, transaction);
         increment ++;
         return transaction.getId();
@@ -46,5 +59,9 @@ public class TransactionManager {
                 transactions.remove(id);*/
             return result;
         }
+    }
+
+    public boolean transactionExists(int id) {
+        return transactions.containsKey(id);
     }
 }
