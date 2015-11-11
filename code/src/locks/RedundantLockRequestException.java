@@ -1,4 +1,4 @@
-package LockManager;
+package locks;
 
 /*
 	The transaction requested a lock that it already had.

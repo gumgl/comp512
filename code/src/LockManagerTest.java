@@ -1,4 +1,4 @@
-import LockManager.*;
+import locks.*;
 
 class LockManagerTest {
     public static void main (String[] args) {
