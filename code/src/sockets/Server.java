@@ -19,7 +19,7 @@ public abstract class Server implements Runnable {
         executorService = Executors.newFixedThreadPool(4);
     }
 
-    abstract ResourceManager setupResourceManager();
+    protected abstract ResourceManager setupResourceManager();
 
     // Accept an incoming socket connection
     @Override

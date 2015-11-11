@@ -40,7 +40,7 @@ public class MiddleWareServer extends Server {
     }
 
     @Override
-    ResourceManager setupResourceManager() {
+    protected ResourceManager setupResourceManager() {
         System.out.println("Trying to connect to the ResourceManagers...");
         // the MiddleWareResourceManager will forward all received RMIs to the specific RMs
         return new MiddleWareResourceManager(
