@@ -25,17 +25,17 @@ public class LocalResourceManager extends ResourceManager {
     // Basic operations on RMItem //
 
     // Read a data item.
-    protected RMItem readData(int tid, String key) throws DeadlockException {
+    protected RMItem readData(int tid, String key) {
         return TM.read(tid, key);
     }
 
     // Write a data item.
-    protected void writeData(int tid, String key, RMItem value) throws DeadlockException {
+    protected void writeData(int tid, String key, RMItem value) {
         TM.write(tid, key, value);
     }
 
     // Remove the item out of storage.
-    protected RMItem removeData(int tid, String key) throws DeadlockException {
+    protected RMItem removeData(int tid, String key) {
         //RMItem value = TM.read(tid, key);
         TM.write(tid, key, null);
         return null; // We should not need to return something here TODO: verify that
@@ -45,7 +45,7 @@ public class LocalResourceManager extends ResourceManager {
     // Basic operations on ReservableItem //
 
     // Delete the entire item.
-    protected boolean deleteItem(int tid, String key) throws DeadlockException {
+    protected boolean deleteItem(int tid, String key) {
         Trace.info("RM::deleteItem(" + tid + ", " + key + ")");
         ReservableItem curObj = (ReservableItem) readData(tid, key);
         // Check if there is such an item in the storage.
@@ -75,7 +75,7 @@ public class LocalResourceManager extends ResourceManager {
     }
 
     // Query the number of available seats/rooms/cars.
-    protected int queryNum(int tid, String key) throws DeadlockException {
+    protected int queryNum(int tid, String key) {
         Trace.info("RM::queryNum(" + tid + ", " + key + ")");
         ReservableItem curObj = (ReservableItem) readData(tid, key);
         int value = 0;
@@ -92,7 +92,7 @@ public class LocalResourceManager extends ResourceManager {
     }
 
     // Query the price of an item.
-    protected int queryPrice(int tid, String key) throws DeadlockException {
+    protected int queryPrice(int tid, String key) {
         Trace.info("RM::queryCarsPrice(" + tid + ", " + key + ")");
         ReservableItem curObj = (ReservableItem) readData(tid, key);
         int value = 0;
@@ -110,7 +110,7 @@ public class LocalResourceManager extends ResourceManager {
 
     // Reserve an item.
     protected boolean reserveItem(int tid, int customerId,
-                                  String key, String location) throws DeadlockException {
+                                  String key, String location) {
         Trace.info("RM::reserveItem(" + tid + ", " + customerId + ", "
                 + key + ", " + location + ")");
         // Read customer object if it exists (and read lock it).
@@ -170,7 +170,7 @@ public class LocalResourceManager extends ResourceManager {
     // its current price.
     @Override
     public boolean addFlight(int tid, int flightNumber,
-                             int numSeats, int flightPrice) throws Exception {
+                             int numSeats, int flightPrice) {
         Trace.info("RM::addFlight(" + tid + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ")");
         Flight curObj = (Flight) readData(tid, Flight.getKey(flightNumber));
@@ -204,18 +204,18 @@ public class LocalResourceManager extends ResourceManager {
     }
 
     @Override
-    public boolean deleteFlight(int tid, int flightNumber) throws Exception {
+    public boolean deleteFlight(int tid, int flightNumber) {
         return deleteItem(tid, Flight.getKey(flightNumber));
     }
 
     // Returns the number of empty seats on this flight.
     @Override
-    public int queryFlight(int tid, int flightNumber) throws Exception {
+    public int queryFlight(int tid, int flightNumber) {
         return queryNum(tid, Flight.getKey(flightNumber));
     }
 
     // Returns price of this flight.
-    public int queryFlightPrice(int tid, int flightNumber) throws Exception {
+    public int queryFlightPrice(int tid, int flightNumber) {
         return queryPrice(tid, Flight.getKey(flightNumber));
     }
 
@@ -262,7 +262,7 @@ public class LocalResourceManager extends ResourceManager {
     // Note: if price <= 0 and the car location already exists, it maintains
     // its current price.
     @Override
-    public boolean addCars(int tid, String location, int numCars, int carPrice) throws Exception {
+    public boolean addCars(int tid, String location, int numCars, int carPrice) {
         Trace.info("RM::addCars(" + tid + ", " + location + ", "
                 + numCars + ", $" + carPrice + ")");
         Car curObj = (Car) readData(tid, Car.getKey(location));
@@ -297,19 +297,19 @@ public class LocalResourceManager extends ResourceManager {
 
     // Delete cars from a location.
     @Override
-    public boolean deleteCars(int tid, String location) throws Exception {
+    public boolean deleteCars(int tid, String location) {
         return deleteItem(tid, Car.getKey(location));
     }
 
     // Returns the number of cars available at a location.
     @Override
-    public int queryCars(int tid, String location) throws Exception {
+    public int queryCars(int tid, String location) {
         return queryNum(tid, Car.getKey(location));
     }
 
     // Returns price of cars at this location.
     @Override
-    public int queryCarsPrice(int tid, String location) throws Exception {
+    public int queryCarsPrice(int tid, String location) {
         return queryPrice(tid, Car.getKey(location));
     }
 
@@ -320,7 +320,7 @@ public class LocalResourceManager extends ResourceManager {
     // Note: if price <= 0 and the room location already exists, it maintains
     // its current price.
     @Override
-    public boolean addRooms(int tid, String location, int numRooms, int roomPrice) throws Exception {
+    public boolean addRooms(int tid, String location, int numRooms, int roomPrice) {
         Trace.info("RM::addRooms(" + tid + ", " + location + ", "
                 + numRooms + ", $" + roomPrice + ")");
         Room curObj = (Room) readData(tid, Room.getKey(location));
@@ -355,19 +355,19 @@ public class LocalResourceManager extends ResourceManager {
 
     // Delete rooms from a location.
     @Override
-    public boolean deleteRooms(int tid, String location) throws Exception {
+    public boolean deleteRooms(int tid, String location) {
         return deleteItem(tid, Room.getKey(location));
     }
 
     // Returns the number of rooms available at a location.
     @Override
-    public int queryRooms(int tid, String location) throws Exception {
+    public int queryRooms(int tid, String location) {
         return queryNum(tid, Room.getKey(location));
     }
 
     // Returns room price at this location.
     @Override
-    public int queryRoomsPrice(int tid, String location) throws Exception {
+    public int queryRoomsPrice(int tid, String location) {
         return queryPrice(tid, Room.getKey(location));
     }
 
@@ -375,7 +375,7 @@ public class LocalResourceManager extends ResourceManager {
     // Customer operations //
 
     @Override
-    public int newCustomer(int tid) throws Exception {
+    public int newCustomer(int tid) {
         Trace.info("RM::newCustomer(" + tid + ")");
         // Generate a globally unique Id for the new customer.
         int customerId = Integer.parseInt(String.valueOf(tid) +
@@ -389,7 +389,7 @@ public class LocalResourceManager extends ResourceManager {
 
     // This method makes testing easier.
     @Override
-    public boolean newCustomerId(int tid, int customerId) throws Exception {
+    public boolean newCustomerId(int tid, int customerId) {
         Trace.info("RM::newCustomer(" + tid + ", " + customerId + ")");
         Customer cust = (Customer) readData(tid, Customer.getKey(customerId));
         if (cust == null) {
@@ -406,7 +406,7 @@ public class LocalResourceManager extends ResourceManager {
 
     // Delete customer from the database.
     @Override
-    public boolean deleteCustomer(int tid, int customerId) throws Exception {
+    public boolean deleteCustomer(int tid, int customerId) {
         Trace.info("RM::deleteCustomer(" + tid + ", " + customerId + ")");
         Customer cust = (Customer) readData(tid, Customer.getKey(customerId));
         if (cust == null) {
@@ -453,7 +453,7 @@ public class LocalResourceManager extends ResourceManager {
     // Return data structure containing customer reservation info.
     // Returns null if the customer doesn't exist.
     // Returns empty RMHashtable if customer exists but has no reservations.
-    public RMHashtable getCustomerReservations(int tid, int customerId) throws Exception {
+    public RMHashtable getCustomerReservations(int tid, int customerId) {
         Trace.info("RM::getCustomerReservations(" + tid + ", "
                 + customerId + ")");
         Customer cust = (Customer) readData(tid, Customer.getKey(customerId));
@@ -476,7 +476,7 @@ public class LocalResourceManager extends ResourceManager {
 
     // Return a bill.
     @Override
-    public String queryCustomerInfo(int tid, int customerId) throws Exception {
+    public String queryCustomerInfo(int tid, int customerId) {
         Trace.info("RM::queryCustomerInfo(" + tid + ", " + customerId + ")");
         Customer cust = (Customer) readData(tid, Customer.getKey(customerId));
         if (cust == null) {
@@ -504,20 +504,20 @@ public class LocalResourceManager extends ResourceManager {
 
     // Add flight reservation to this customer.
     @Override
-    public boolean reserveFlight(int tid, int customerId, int flightNumber) throws Exception {
+    public boolean reserveFlight(int tid, int customerId, int flightNumber) {
         return reserveItem(tid, customerId,
                 Flight.getKey(flightNumber), String.valueOf(flightNumber));
     }
 
     // Add car reservation to this customer.
     @Override
-    public boolean reserveCar(int tid, int customerId, String location) throws Exception {
+    public boolean reserveCar(int tid, int customerId, String location) {
         return reserveItem(tid, customerId, Car.getKey(location), location);
     }
 
     // Add room reservation to this customer.
     @Override
-    public boolean reserveRoom(int tid, int customerId, String location) throws Exception {
+    public boolean reserveRoom(int tid, int customerId, String location) {
         return reserveItem(tid, customerId, Room.getKey(location), location);
     }
 
@@ -525,32 +525,32 @@ public class LocalResourceManager extends ResourceManager {
     // Reserve an itinerary.
     @Override
     public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers,
-                                    String location, boolean car, boolean room) throws Exception {
+                                    String location, boolean car, boolean room) {
         return false;
     }
 
     /* Should not get called... the middleware decides on transaction IDs */
     @Override
-    public int start() throws Exception {
+    public int start() {
         Trace.info("RM::start()");
         return TM.start();
     }
 
     @Override
-    public boolean start(int transactionId) throws Exception {
+    public boolean start(int transactionId) {
         Trace.info(String.format("RM::start(%d)", transactionId));
         return (TM.start(transactionId) != null);
     }
 
     @Override
-    public boolean commit(int transactionId) throws Exception {
+    public boolean commit(int transactionId) {
         Trace.info(String.format("RM::commit(%d)", transactionId));
         return TM.commit(transactionId);
     }
 
     /* Not actually used in this implementation, only in MiddlewareResourceManager */
     @Override
-    public boolean abort(int transactionId) throws Exception {
+    public boolean abort(int transactionId) {
         Trace.info(String.format("RM::abort(%d)", transactionId));
         return TM.abort(transactionId);
     }

@@ -4,9 +4,9 @@ import java.io.Serializable;
 
 public class Response implements Serializable {
     private Object returnValue;
-    private Exception exception = null;
+    private RuntimeException exception = null;
 
-    public Response(Object returnValue, Exception e) {
+    public Response(Object returnValue, RuntimeException e) {
         this.returnValue = returnValue;
         this.exception = e;
     }
@@ -15,7 +15,7 @@ public class Response implements Serializable {
     }
 
     /* Static constructor to bundle Exception within Response */
-    public static Response error(Exception e) {
+    public static Response error(RuntimeException e) {
         return new Response(null, e);
     }
 
@@ -23,7 +23,7 @@ public class Response implements Serializable {
         return returnValue;
     }
 
-    public Exception getException() {
+    public RuntimeException getException() {
         return exception;
     }
 

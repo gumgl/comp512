@@ -27,344 +27,219 @@ public class RMIResourceManager extends ResourceManager {
 
     @Override
     public boolean addFlight(int tid, int flightNumber,
-                             int numSeats, int flightPrice) throws Exception {
-        try {
-            Invocation invocation = new Invocation("addFlight");
-            invocation.addParam(tid);
-            invocation.addParam(flightNumber);
-            invocation.addParam(numSeats);
-            invocation.addParam(flightPrice);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+                             int numSeats, int flightPrice) {
+        Invocation invocation = new Invocation("addFlight");
+        invocation.addParam(tid);
+        invocation.addParam(flightNumber);
+        invocation.addParam(numSeats);
+        invocation.addParam(flightPrice);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public boolean deleteFlight(int tid, int flightNumber) throws Exception {
-        try {
-            Invocation invocation = new Invocation("deleteFlight");
-            invocation.addParam(tid);
-            invocation.addParam(flightNumber);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean deleteFlight(int tid, int flightNumber) {
+        Invocation invocation = new Invocation("deleteFlight");
+        invocation.addParam(tid);
+        invocation.addParam(flightNumber);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public int queryFlight(int tid, int flightNumber) throws Exception {
-        try {
-            Invocation invocation = new Invocation("queryFlight");
-            invocation.addParam(tid);
-            invocation.addParam(flightNumber);
-            return (Integer) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
-    }
-
-    @Override
-    public int queryFlightPrice(int tid, int flightNumber) throws Exception {
-        try {
-            Invocation invocation = new Invocation("queryFlightPrice");
-            invocation.addParam(tid);
-            invocation.addParam(flightNumber);
+    public int queryFlight(int tid, int flightNumber) {
+        Invocation invocation = new Invocation("queryFlight");
+        invocation.addParam(tid);
+        invocation.addParam(flightNumber);
         return (Integer) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
+    }
+
+    @Override
+    public int queryFlightPrice(int tid, int flightNumber) {
+        Invocation invocation = new Invocation("queryFlightPrice");
+        invocation.addParam(tid);
+        invocation.addParam(flightNumber);
+        return (Integer) target.invoke(invocation);
     }
 
     // Car operations //
 
     @Override
-    public boolean addCars(int tid, String location, int numCars, int carPrice) throws Exception {
-        try {
-            Invocation invocation = new Invocation("addCars");
-            invocation.addParam(tid);
-            invocation.addParam(location);
-            invocation.addParam(numCars);
-            invocation.addParam(carPrice);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean addCars(int tid, String location, int numCars, int carPrice) {
+        Invocation invocation = new Invocation("addCars");
+        invocation.addParam(tid);
+        invocation.addParam(location);
+        invocation.addParam(numCars);
+        invocation.addParam(carPrice);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public boolean deleteCars(int tid, String location) throws Exception {
-        try {
-            Invocation invocation = new Invocation("deleteCars");
-            invocation.addParam(tid);
-            invocation.addParam(location);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean deleteCars(int tid, String location) {
+        Invocation invocation = new Invocation("deleteCars");
+        invocation.addParam(tid);
+        invocation.addParam(location);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public int queryCars(int tid, String location) throws Exception {
-        try {
-            Invocation invocation = new Invocation("queryCars");
-            invocation.addParam(tid);
-            invocation.addParam(location);
-            return (Integer) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
+    public int queryCars(int tid, String location) {
+        Invocation invocation = new Invocation("queryCars");
+        invocation.addParam(tid);
+        invocation.addParam(location);
+        return (Integer) target.invoke(invocation);
     }
 
     @Override
-    public int queryCarsPrice(int tid, String location) throws Exception {
-        try {
-            Invocation invocation = new Invocation("queryCarsPrice");
-            invocation.addParam(tid);
-            invocation.addParam(location);
-            return (Integer) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
+    public int queryCarsPrice(int tid, String location) {
+        Invocation invocation = new Invocation("queryCarsPrice");
+        invocation.addParam(tid);
+        invocation.addParam(location);
+        return (Integer) target.invoke(invocation);
     }
 
     // Room operations //
 
     @Override
-    public boolean addRooms(int tid, String location, int numRooms, int roomPrice) throws Exception {
-        try {
-            Invocation invocation = new Invocation("addRooms");
-            invocation.addParam(tid);
-            invocation.addParam(location);
-            invocation.addParam(numRooms);
-            invocation.addParam(roomPrice);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean addRooms(int tid, String location, int numRooms, int roomPrice) {
+        Invocation invocation = new Invocation("addRooms");
+        invocation.addParam(tid);
+        invocation.addParam(location);
+        invocation.addParam(numRooms);
+        invocation.addParam(roomPrice);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public boolean deleteRooms(int tid, String location) throws Exception {
-        try {
-            Invocation invocation = new Invocation("deleteRooms");
-            invocation.addParam(tid);
-            invocation.addParam(location);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean deleteRooms(int tid, String location) {
+        Invocation invocation = new Invocation("deleteRooms");
+        invocation.addParam(tid);
+        invocation.addParam(location);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public int queryRooms(int tid, String location) throws Exception {
-        try {
-            Invocation invocation = new Invocation("queryRooms");
-            invocation.addParam(tid);
-            invocation.addParam(location);
-            return (Integer) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
+    public int queryRooms(int tid, String location) {
+        Invocation invocation = new Invocation("queryRooms");
+        invocation.addParam(tid);
+        invocation.addParam(location);
+        return (Integer) target.invoke(invocation);
     }
 
     @Override
-    public int queryRoomsPrice(int tid, String location) throws Exception {
-        try {
-            Invocation invocation = new Invocation("queryRoomsPrice");
-            invocation.addParam(tid);
-            invocation.addParam(location);
-            return (Integer) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
+    public int queryRoomsPrice(int tid, String location) {
+        Invocation invocation = new Invocation("queryRoomsPrice");
+        invocation.addParam(tid);
+        invocation.addParam(location);
+        return (Integer) target.invoke(invocation);
     }
 
 
     // Customer operations //
 
     @Override
-    public int newCustomer(int tid) throws Exception {
-        try {
-            Invocation invocation = new Invocation("newCustomer");
-            invocation.addParam(tid);
-            return (Integer) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
+    public int newCustomer(int tid) {
+        Invocation invocation = new Invocation("newCustomer");
+        invocation.addParam(tid);
+        return (Integer) target.invoke(invocation);
     }
 
     @Override
-    public boolean newCustomerId(int tid, int customerId) throws Exception {
-        try {
-            Invocation invocation = new Invocation("newCustomerId");
-            invocation.addParam(tid);
-            invocation.addParam(customerId);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean newCustomerId(int tid, int customerId) {
+        Invocation invocation = new Invocation("newCustomerId");
+        invocation.addParam(tid);
+        invocation.addParam(customerId);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public boolean deleteCustomer(int tid, int customerId) throws Exception {
-        try {
-            Invocation invocation = new Invocation("deleteCustomer");
-            invocation.addParam(tid);
-            invocation.addParam(customerId);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean deleteCustomer(int tid, int customerId) {
+        Invocation invocation = new Invocation("deleteCustomer");
+        invocation.addParam(tid);
+        invocation.addParam(customerId);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public String queryCustomerInfo(int tid, int customerId) throws Exception {
-        try {
-            Invocation invocation = new Invocation("queryCustomerInfo");
-            invocation.addParam(tid);
-            invocation.addParam(customerId);
-            return target.invoke(invocation).toString();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return "";
-        }
+    public String queryCustomerInfo(int tid, int customerId) {
+        Invocation invocation = new Invocation("queryCustomerInfo");
+        invocation.addParam(tid);
+        invocation.addParam(customerId);
+        return target.invoke(invocation).toString();
     }
 
     @Override
-    public boolean reserveFlight(int tid, int customerId, int flightNumber) throws Exception {
-        try {
-            Invocation invocation = new Invocation("reserveFlight");
-            invocation.addParam(tid);
-            invocation.addParam(customerId);
-            invocation.addParam(flightNumber);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean reserveFlight(int tid, int customerId, int flightNumber) {
+        Invocation invocation = new Invocation("reserveFlight");
+        invocation.addParam(tid);
+        invocation.addParam(customerId);
+        invocation.addParam(flightNumber);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public boolean reserveCar(int tid, int customerId, String location) throws Exception {
-        try {
-            Invocation invocation = new Invocation("reserveCar");
-            invocation.addParam(tid);
-            invocation.addParam(customerId);
-            invocation.addParam(location);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean reserveCar(int tid, int customerId, String location) {
+        Invocation invocation = new Invocation("reserveCar");
+        invocation.addParam(tid);
+        invocation.addParam(customerId);
+        invocation.addParam(location);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public boolean reserveRoom(int tid, int customerId, String location) throws Exception {
-        try {
-            Invocation invocation = new Invocation("reserveRoom");
-            invocation.addParam(tid);
-            invocation.addParam(customerId);
-            invocation.addParam(location);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean reserveRoom(int tid, int customerId, String location) {
+        Invocation invocation = new Invocation("reserveRoom");
+        invocation.addParam(tid);
+        invocation.addParam(customerId);
+        invocation.addParam(location);
+        return (Boolean) target.invoke(invocation);
     }
 
 
     @Override
     public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers,
-                                    String location, boolean car, boolean room) throws Exception {
-        try {
-            Invocation invocation = new Invocation("reserveItinerary");
-            invocation.addParam(tid);
-            invocation.addParam(customerId);
-            invocation.addParam(flightNumbers);
-            invocation.addParam(location);
-            invocation.addParam(car);
-            invocation.addParam(room);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+                                    String location, boolean car, boolean room) {
+        Invocation invocation = new Invocation("reserveItinerary");
+        invocation.addParam(tid);
+        invocation.addParam(customerId);
+        invocation.addParam(flightNumbers);
+        invocation.addParam(location);
+        invocation.addParam(car);
+        invocation.addParam(room);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public int start() throws Exception {
-        try {
-            Invocation invocation = new Invocation("start");
-            return (Integer) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return -1;
-        }
+    public int start() {
+        Invocation invocation = new Invocation("start");
+        return (Integer) target.invoke(invocation);
     }
 
     @Override
-    public boolean start(int transactionId) throws Exception {
-        try {
-            Invocation invocation = new Invocation("start");
-            invocation.addParam(transactionId);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean start(int transactionId) {
+        Invocation invocation = new Invocation("start");
+        invocation.addParam(transactionId);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public boolean commit(int transactionId) throws Exception {
-        try {
-            Invocation invocation = new Invocation("commit");
-            invocation.addParam(transactionId);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean commit(int transactionId) {
+        Invocation invocation = new Invocation("commit");
+        invocation.addParam(transactionId);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
-    public boolean abort(int transactionId) throws Exception {
-        try {
-            Invocation invocation = new Invocation("abort");
-            invocation.addParam(transactionId);
-            return (Boolean) target.invoke(invocation);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+    public boolean abort(int transactionId) {
+        Invocation invocation = new Invocation("abort");
+        invocation.addParam(transactionId);
+        return (Boolean) target.invoke(invocation);
     }
 
     @Override
     public boolean shutdown() {
-        try {
-            Invocation invocation = new Invocation("shutdown");
-            boolean success = (Boolean) target.invoke(invocation);
-            active = !success;
-            return success;
-        } catch (Exception e) {
-            e.printStackTrace();
-            return false;
-        }
+        Invocation invocation = new Invocation("shutdown");
+        boolean success = (Boolean) target.invoke(invocation);
+        active = !success;
+        return success;
     }
 
 }

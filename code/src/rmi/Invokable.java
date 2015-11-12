@@ -1,5 +1,5 @@
 package rmi;
 
 public interface Invokable {
-    public Object invoke(Invocation invocation) throws Exception;
+    public Object invoke(Invocation invocation) throws RuntimeException;
 }

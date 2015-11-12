@@ -9,7 +9,7 @@ import java.net.InetAddress;
 import java.util.*;
 import java.io.*;
 
-
+// TODO: Refactor this horrible mess and use OOP
 public class Client {
 
     ResourceManager proxy;
@@ -64,18 +64,15 @@ public class Client {
             try {
                 //read the next command
                 command = stdin.readLine();
-            }
-            catch (IOException io) {
-                System.out.println("Unable to read from standard in");
+            } catch (IOException io) {
+                System.out.println("Unable to read from standard input");
                 System.exit(1);
             }
             //remove heading and trailing white space
             command = command.trim();
             arguments = parse(command);
 
-
             try {
-                //TODO: Refactor the try/catch and better handle IOExceptions
                 //decide which of the commands this was
                 switch (findChoice((String) arguments.elementAt(0))) {
 
@@ -479,8 +476,9 @@ public class Client {
                 }
             } catch (InvalidTransactionIDException e) {
                 System.out.println(e.getClass().getName() + ": " + e.getMessage());
-            } catch (Exception e) {
+            } catch (RuntimeException e) {
                 System.out.println("Uncaught " + e.getClass().getName() + ": " + e.getMessage());
+                e.printStackTrace(System.out);
             }
         }
     }
@@ -608,8 +606,7 @@ public class Client {
                 System.out.println("\nUsage: ");
                 System.out.println("\tnewcustomer, <id>");
                 break;
-            
-            
+
             case 6: //delete Flight
                 System.out.println("Deleting a flight");
                 System.out.println("Purpose: ");
@@ -794,31 +791,16 @@ public class Client {
         System.out.println("Type help, <commandname> to check usage of this command.");
     }
 
-    public int getInt(Object temp) throws Exception {
-        try {
-            return (new Integer((String)temp)).intValue();
-        }
-        catch(Exception e) {
-            throw e;
-        }
+    public int getInt(Object temp) {
+        return Integer.parseInt((String)temp);
     }
     
-    public boolean getBoolean(Object temp) throws Exception {
-        try {
-            return (new Boolean((String)temp)).booleanValue();
-        }
-        catch(Exception e) {
-            throw e;
-        }
+    public boolean getBoolean(Object temp) {
+        return Boolean.parseBoolean((String)temp);
     }
 
-    public String getString(Object temp) throws Exception {
-        try {    
-            return (String)temp;
-        }
-        catch (Exception e) {
-            throw e;
-        }
+    public String getString(Object temp) {
+        return (String)temp;
     }
     
 }

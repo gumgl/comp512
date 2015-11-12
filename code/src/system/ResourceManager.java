@@ -35,7 +35,7 @@ public abstract class ResourceManager {
      *
      * @return success.
      */
-    abstract public boolean addFlight(int tid, int flightNumber, int numSeats, int flightPrice) throws Exception;
+    abstract public boolean addFlight(int tid, int flightNumber, int numSeats, int flightPrice);
 
     /**
      * Delete the entire flight.
@@ -44,13 +44,13 @@ public abstract class ResourceManager {
      *
      * @return success.
      */
-    abstract public boolean deleteFlight(int tid, int flightNumber) throws Exception;
+    abstract public boolean deleteFlight(int tid, int flightNumber);
 
     /* Return the number of empty seats in this flight. */
-    abstract public int queryFlight(int tid, int flightNumber) throws Exception;
+    abstract public int queryFlight(int tid, int flightNumber);
 
     /* Return the price of a seat on this flight. */
-    abstract public int queryFlightPrice(int tid, int flightNumber) throws Exception;
+    abstract public int queryFlightPrice(int tid, int flightNumber);
 
 
     // Car operations //
@@ -59,18 +59,18 @@ public abstract class ResourceManager {
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
-    abstract public boolean addCars(int tid, String location, int numCars, int carPrice) throws Exception;
+    abstract public boolean addCars(int tid, String location, int numCars, int carPrice);
 
     /* Delete all cars from a location.
      * It should not succeed if there are reservations for this location.
      */
-    abstract public boolean deleteCars(int tid, String location) throws Exception;
+    abstract public boolean deleteCars(int tid, String location);
 
     /* Return the number of cars available at this location. */
-    abstract public int queryCars(int tid, String location) throws Exception;
+    abstract public int queryCars(int tid, String location);
 
     /* Return the price of a car at this location. */
-    abstract public int queryCarsPrice(int tid, String location) throws Exception;
+    abstract public int queryCarsPrice(int tid, String location);
 
 
     // Room operations //
@@ -79,59 +79,59 @@ public abstract class ResourceManager {
      * This should look a lot like addFlight, only keyed on a string location
      * instead of a flight number.
      */
-    abstract public boolean addRooms(int tid, String location, int numRooms, int roomPrice) throws Exception;
+    abstract public boolean addRooms(int tid, String location, int numRooms, int roomPrice);
 
     /* Delete all rooms from a location.
      * It should not succeed if there are reservations for this location.
      */
-    abstract public boolean deleteRooms(int tid, String location) throws Exception;
+    abstract public boolean deleteRooms(int tid, String location);
 
     /* Return the number of rooms available at this location. */
-    abstract public int queryRooms(int tid, String location) throws Exception;
+    abstract public int queryRooms(int tid, String location);
 
     /* Return the price of a room at this location. */
-    abstract public int queryRoomsPrice(int tid, String location) throws Exception;
+    abstract public int queryRoomsPrice(int tid, String location);
 
 
     // Customer operations //
 
     /* Create a new customer and return their unique identifier. */
-    abstract public int newCustomer(int tid) throws Exception;
+    abstract public int newCustomer(int tid);
 
     /* Create a new customer with the provided identifier. */
-    abstract public boolean newCustomerId(int tid, int customerId) throws Exception;
+    abstract public boolean newCustomerId(int tid, int customerId);
 
     /* Remove this customer and all their associated reservations. */
-    abstract public boolean deleteCustomer(int tid, int customerId) throws Exception;
+    abstract public boolean deleteCustomer(int tid, int customerId);
 
     /* Return a bill. */
-    abstract public String queryCustomerInfo(int tid, int customerId) throws Exception;
+    abstract public String queryCustomerInfo(int tid, int customerId);
 
     /* Reserve a seat on this flight. */
-    abstract public boolean reserveFlight(int tid, int customerId, int flightNumber) throws Exception;
+    abstract public boolean reserveFlight(int tid, int customerId, int flightNumber);
 
     /* Reserve a car at this location. */
-    abstract public boolean reserveCar(int tid, int customerId, String location) throws Exception;
+    abstract public boolean reserveCar(int tid, int customerId, String location);
 
     /* Reserve a room at this location. */
-    abstract public boolean reserveRoom(int tid, int customerId, String location) throws Exception;
+    abstract public boolean reserveRoom(int tid, int customerId, String location);
 
 
     /* Reserve an itinerary. */
     abstract public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers,
-                                    String location, boolean car, boolean room) throws Exception;
+                                    String location, boolean car, boolean room);
 
     /* Start a new transaction and return its id */
-    abstract public int start() throws Exception;
+    abstract public int start();
 
     /* Start a new transaction and return its id */
-    abstract public boolean start(int transactionId) throws Exception;
+    abstract public boolean start(int transactionId);
 
     /* Attempt to commit the given transaction; return true upon success */
-    abstract public boolean commit(int transactionId) throws Exception;
+    abstract public boolean commit(int transactionId);
 
     /* Abort the given transaction */
-    abstract public boolean abort(int transactionId) throws Exception;
+    abstract public boolean abort(int transactionId);
 
     /* Shutdown the RM gracefully */
     abstract public boolean shutdown();

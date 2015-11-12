@@ -23,9 +23,6 @@ public class TransactionManager {
     protected Transaction getTransaction(int id) {
         return transactions.get(id);
     }
-    /*public ResourceManager getTransactionBuffer(int id) {
-        return transactions.get(id).rm;
-    }*/
 
     /* Add a ResourceManager to the list of involved RMs */
     public boolean enlist(int tid, ResourceManager rm) {
@@ -84,16 +81,16 @@ public class TransactionManager {
     }
 
     /* Start a new transaction and with a new ID */
-    public synchronized int start() {
+    public synchronized int start() throws InvalidTransactionIDException {
         Transaction transaction = start(TC);
         TC++;
         return transaction.id;
     }
     /* Start a transaction with a given ID */
-    public Transaction start(int tid) {
+    public Transaction start(int tid) throws InvalidTransactionIDException {
         synchronized (transactions) {
             if (transactions.containsKey(tid)) {
-                return null; // TODO use Exceptions
+                throw new InvalidTransactionIDException(tid);
             } else {
                 Transaction t = new Transaction(tid);
                 transactions.put(tid, t);
@@ -103,11 +100,11 @@ public class TransactionManager {
     }
 
     /* Attempt to commit the given transaction; return true upon success */
-    public boolean commit(int tid) throws Exception {
+    public boolean commit(int tid) {
         Transaction t = transactions.get(tid);
         synchronized (t) {
-            if (t == null || t.state != State.STARTED) // Transaction does not exist or not in correct state
-                return false;
+            if (!isTransactionIdValid(tid)) // Transaction does not exist or not in correct state
+                throw new InvalidTransactionIDException(tid);
             else synchronized (items) {
                 for (String key : t.cacheChanged) // Store all changes to global storage
                     items.put(key, t.cacheValues.get(key));
@@ -123,15 +120,16 @@ public class TransactionManager {
         }
     }
 
-    // TODO: Refactor to use Exceptions try/catch/finally
     /* Abort the given transaction */
-    public boolean abort(int tid) throws Exception {
+    public boolean abort(int tid) {
         Transaction t = transactions.get(tid);
         synchronized (t) {
-            if (t == null || t.state != State.STARTED) // Transaction does not exist or not in correct state
-                return false;
+            if (!isTransactionIdValid(tid)) // Transaction does not exist or not in correct state
+                throw new InvalidTransactionIDException(tid);
             else {
                 t.state = State.ABORTED;
+                t.cacheValues.clear();
+                t.cacheChanged.clear();
                 for (ResourceManager rm : t.enlistedRMs)
                     rm.abort(tid);
                 return true;

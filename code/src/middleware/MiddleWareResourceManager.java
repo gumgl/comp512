@@ -8,7 +8,6 @@ import transactions.InvalidTransactionIDException;
 import transactions.TransactionManager;
 
 import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
 
 //TODO: Find a way to accumulate operations' RMIs until commit
 public class MiddlewareResourceManager extends ResourceManager {
@@ -35,9 +34,9 @@ public class MiddlewareResourceManager extends ResourceManager {
      * Returns the correct RM on which the operation should be executed */
     private ResourceManager handleOperation(int tid, ResourceManager relevantRM) throws InvalidTransactionIDException {
         if (!TM.isTransactionIdValid(tid)) {
-            String message = String.format("Transaction #%d is not valid\n",tid);
-            Trace.error(message);
-            throw new InvalidTransactionIDException(message);
+            InvalidTransactionIDException e = new InvalidTransactionIDException(tid);
+            Trace.error(e.getMessage());
+            throw e;
         } else {
             TM.enlist(tid, relevantRM);
             return relevantRM;
@@ -45,68 +44,68 @@ public class MiddlewareResourceManager extends ResourceManager {
     }
 
     @Override
-    public boolean addFlight(int tid, int flightNumber, int numSeats, int flightPrice) throws Exception {
+    public boolean addFlight(int tid, int flightNumber, int numSeats, int flightPrice) {
         return handleOperation(tid, flightRM).addFlight(tid, flightNumber, numSeats, flightPrice);
     }
 
     @Override
-    public boolean deleteFlight(int tid, int flightNumber) throws Exception {
+    public boolean deleteFlight(int tid, int flightNumber) {
         return handleOperation(tid, flightRM).deleteFlight(tid, flightNumber);
     }
 
     @Override
-    public int queryFlight(int tid, int flightNumber) throws Exception {
+    public int queryFlight(int tid, int flightNumber) {
         return handleOperation(tid, flightRM).queryFlight(tid, flightNumber);
     }
 
     @Override
-    public int queryFlightPrice(int tid, int flightNumber) throws Exception {
+    public int queryFlightPrice(int tid, int flightNumber) {
         return handleOperation(tid, flightRM).queryFlightPrice(tid, flightNumber);
     }
 
     @Override
-    public boolean addCars(int tid, String location, int numCars, int carPrice) throws Exception {
+    public boolean addCars(int tid, String location, int numCars, int carPrice) {
         return handleOperation(tid, carRM).addCars(tid, location, numCars, carPrice);
     }
 
     @Override
-    public boolean deleteCars(int tid, String location) throws Exception {
+    public boolean deleteCars(int tid, String location) {
         return handleOperation(tid, carRM).deleteCars(tid, location);
     }
 
     @Override
-    public int queryCars(int tid, String location) throws Exception {
+    public int queryCars(int tid, String location) {
         handleOperation(tid, carRM);
         return handleOperation(tid, carRM).queryCars(tid, location);
     }
 
     @Override
-    public int queryCarsPrice(int tid, String location) throws Exception {
+    public int queryCarsPrice(int tid, String location) {
         return handleOperation(tid, carRM).queryCarsPrice(tid, location);
     }
 
     @Override
-    public boolean addRooms(int tid, String location, int numRooms, int roomPrice) throws Exception {
+    public boolean addRooms(int tid, String location, int numRooms, int roomPrice) {
         return handleOperation(tid, roomRM).addRooms(tid, location, numRooms, roomPrice);
     }
 
     @Override
-    public boolean deleteRooms(int tid, String location) throws Exception {
+    public boolean deleteRooms(int tid, String location) {
         return handleOperation(tid, roomRM).deleteRooms(tid, location);
     }
 
     @Override
-    public int queryRooms(int tid, String location) throws Exception {
+    public int queryRooms(int tid, String location) {
         return handleOperation(tid, roomRM).queryRooms(tid, location);
     }
 
     @Override
-    public int queryRoomsPrice(int tid, String location) throws Exception {
+    public int queryRoomsPrice(int tid, String location) {
         return handleOperation(tid, roomRM).queryRoomsPrice(tid, location);
     }
 
     @Override
-    public int newCustomer(int tid) throws Exception {
+    public int newCustomer(int tid) {
         int customerId  = handleOperation(tid, customerRM).newCustomer(tid);
         handleOperation(tid, flightRM).newCustomerId(tid, customerId);
         handleOperation(tid, carRM).newCustomerId(tid, customerId);
@@ -115,7 +114,7 @@ public class MiddlewareResourceManager extends ResourceManager {
     }
 
     @Override
-    public boolean newCustomerId(int tid, int customerId) throws Exception {
+    public boolean newCustomerId(int tid, int customerId) {
         boolean success = true;
         success &= handleOperation(tid, customerRM).newCustomerId(tid, customerId);
         success &= handleOperation(tid, flightRM).newCustomerId(tid, customerId);
@@ -125,7 +124,7 @@ public class MiddlewareResourceManager extends ResourceManager {
     }
 
     @Override
-    public boolean deleteCustomer(int tid, int customerId) throws Exception {
+    public boolean deleteCustomer(int tid, int customerId) {
         boolean success = true;
         success &= handleOperation(tid, customerRM).deleteCustomer(tid, customerId);
         success &= handleOperation(tid, flightRM).deleteCustomer(tid, customerId);
@@ -135,7 +134,7 @@ public class MiddlewareResourceManager extends ResourceManager {
     }
 
     @Override
-    public String queryCustomerInfo(int tid, int customerId) throws Exception {
+    public String queryCustomerInfo(int tid, int customerId) {
         Trace.info("MW::queryCustomerInfo(" + tid + ", " + customerId + ")");
         handleOperation(tid, customerRM);
         if (customerRM.getCustomerReservations(tid, customerId) == null) { // Customer does not exist
@@ -159,22 +158,22 @@ public class MiddlewareResourceManager extends ResourceManager {
     }
 
     @Override
-    public boolean reserveFlight(int tid, int customerId, int flightNumber) throws Exception {
+    public boolean reserveFlight(int tid, int customerId, int flightNumber) {
         return handleOperation(tid, flightRM).reserveFlight(tid, customerId, flightNumber);
     }
 
     @Override
-    public boolean reserveCar(int tid, int customerId, String location) throws Exception {
+    public boolean reserveCar(int tid, int customerId, String location) {
         return handleOperation(tid, carRM).reserveCar(tid, customerId, location);
     }
 
     @Override
-    public boolean reserveRoom(int tid, int customerId, String location) throws Exception {
+    public boolean reserveRoom(int tid, int customerId, String location) {
         return handleOperation(tid, roomRM).reserveRoom(tid, customerId, location);
     }
 
     @Override
-    public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers, String location, boolean car, boolean room) throws Exception {
+    public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers, String location, boolean car, boolean room) {
         Trace.info("MW::reserveItinerary(" + tid + ", " + customerId + ", ...)");
         handleOperation(tid, customerRM);
         if (customerRM.getCustomerReservations(tid, customerId) == null) { // Customer does not exist
@@ -215,7 +214,7 @@ public class MiddlewareResourceManager extends ResourceManager {
     }
 
     @Override
-    public int start() throws Exception {
+    public int start() {
         Trace.info("MW::start()");
         int id = TM.start(); // First locally start with latest TC
         flightRM.start(id); // Then forward start with same TC
@@ -225,7 +224,7 @@ public class MiddlewareResourceManager extends ResourceManager {
     }
 
     @Override
-    public boolean start(int transactionId) throws Exception {
+    public boolean start(int transactionId) {
         Trace.info(String.format("MW::start(%d)", transactionId));
         return false; // Middleware should not accept a fixed transactionId
         /*if (TM.isTransactionIdValid(transactionId))
@@ -240,13 +239,13 @@ public class MiddlewareResourceManager extends ResourceManager {
     }
 
     @Override
-    public boolean commit(int transactionId) throws Exception {
+    public boolean commit(int transactionId) {
         Trace.info(String.format("MW::commit(%d)", transactionId));
         return TM.commit(transactionId); // The TM also takes care of calling t.enlistedTMs.commit()
     }
 
     @Override
-    public boolean abort(int transactionId) throws Exception {
+    public boolean abort(int transactionId) {
         Trace.info(String.format("MW::abort(%d)", transactionId));
         return TM.abort(transactionId);
     }
