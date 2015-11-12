@@ -7,10 +7,8 @@ package server;
 
 import rmi.Invocation;
 import rmi.Invokable;
-import rmi.SocketSender;
 import system.IResourceManager;
 
-import java.net.InetAddress;
 import java.util.Vector;
 
 /*
@@ -29,7 +27,7 @@ public class RMIResourceManager implements IResourceManager {
 
     @Override
     public boolean addFlight(int id, int flightNumber,
-                             int numSeats, int flightPrice) {
+                             int numSeats, int flightPrice) throws Exception {
         try {
             Invocation invocation = new Invocation("addFlight");
             invocation.addParam(id);
@@ -44,7 +42,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean deleteFlight(int id, int flightNumber) {
+    public boolean deleteFlight(int id, int flightNumber) throws Exception {
         try {
             Invocation invocation = new Invocation("deleteFlight");
             invocation.addParam(id);
@@ -57,7 +55,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public int queryFlight(int id, int flightNumber) {
+    public int queryFlight(int id, int flightNumber) throws Exception {
         try {
             Invocation invocation = new Invocation("queryFlight");
             invocation.addParam(id);
@@ -70,7 +68,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public int queryFlightPrice(int id, int flightNumber) {
+    public int queryFlightPrice(int id, int flightNumber) throws Exception {
         try {
             Invocation invocation = new Invocation("queryFlightPrice");
             invocation.addParam(id);
@@ -85,7 +83,7 @@ public class RMIResourceManager implements IResourceManager {
     // Car operations //
 
     @Override
-    public boolean addCars(int id, String location, int numCars, int carPrice) {
+    public boolean addCars(int id, String location, int numCars, int carPrice) throws Exception {
         try {
             Invocation invocation = new Invocation("addCars");
             invocation.addParam(id);
@@ -100,7 +98,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean deleteCars(int id, String location) {
+    public boolean deleteCars(int id, String location) throws Exception {
         try {
             Invocation invocation = new Invocation("deleteCars");
             invocation.addParam(id);
@@ -113,7 +111,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public int queryCars(int id, String location) {
+    public int queryCars(int id, String location) throws Exception {
         try {
             Invocation invocation = new Invocation("queryCars");
             invocation.addParam(id);
@@ -126,7 +124,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public int queryCarsPrice(int id, String location) {
+    public int queryCarsPrice(int id, String location) throws Exception {
         try {
             Invocation invocation = new Invocation("queryCarsPrice");
             invocation.addParam(id);
@@ -141,7 +139,7 @@ public class RMIResourceManager implements IResourceManager {
     // Room operations //
 
     @Override
-    public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
+    public boolean addRooms(int id, String location, int numRooms, int roomPrice) throws Exception {
         try {
             Invocation invocation = new Invocation("addRooms");
             invocation.addParam(id);
@@ -156,7 +154,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean deleteRooms(int id, String location) {
+    public boolean deleteRooms(int id, String location) throws Exception {
         try {
             Invocation invocation = new Invocation("deleteRooms");
             invocation.addParam(id);
@@ -169,7 +167,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public int queryRooms(int id, String location) {
+    public int queryRooms(int id, String location) throws Exception {
         try {
             Invocation invocation = new Invocation("queryRooms");
             invocation.addParam(id);
@@ -182,7 +180,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public int queryRoomsPrice(int id, String location) {
+    public int queryRoomsPrice(int id, String location) throws Exception {
         try {
             Invocation invocation = new Invocation("queryRoomsPrice");
             invocation.addParam(id);
@@ -198,7 +196,7 @@ public class RMIResourceManager implements IResourceManager {
     // Customer operations //
 
     @Override
-    public int newCustomer(int id) {
+    public int newCustomer(int id) throws Exception {
         try {
             Invocation invocation = new Invocation("newCustomer");
             invocation.addParam(id);
@@ -210,7 +208,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean newCustomerId(int id, int customerId) {
+    public boolean newCustomerId(int id, int customerId) throws Exception {
         try {
             Invocation invocation = new Invocation("newCustomerId");
             invocation.addParam(id);
@@ -223,7 +221,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean deleteCustomer(int id, int customerId) {
+    public boolean deleteCustomer(int id, int customerId) throws Exception {
         try {
             Invocation invocation = new Invocation("deleteCustomer");
             invocation.addParam(id);
@@ -236,7 +234,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public String queryCustomerInfo(int id, int customerId) {
+    public String queryCustomerInfo(int id, int customerId) throws Exception {
         try {
             Invocation invocation = new Invocation("queryCustomerInfo");
             invocation.addParam(id);
@@ -249,7 +247,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean reserveFlight(int id, int customerId, int flightNumber) {
+    public boolean reserveFlight(int id, int customerId, int flightNumber) throws Exception {
         try {
             Invocation invocation = new Invocation("reserveFlight");
             invocation.addParam(id);
@@ -263,7 +261,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean reserveCar(int id, int customerId, String location) {
+    public boolean reserveCar(int id, int customerId, String location) throws Exception {
         try {
             Invocation invocation = new Invocation("reserveCar");
             invocation.addParam(id);
@@ -277,7 +275,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean reserveRoom(int id, int customerId, String location) {
+    public boolean reserveRoom(int id, int customerId, String location) throws Exception {
         try {
             Invocation invocation = new Invocation("reserveRoom");
             invocation.addParam(id);
@@ -293,7 +291,7 @@ public class RMIResourceManager implements IResourceManager {
 
     @Override
     public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
-                                    String location, boolean car, boolean room) {
+                                    String location, boolean car, boolean room) throws Exception {
         try {
             Invocation invocation = new Invocation("reserveItinerary");
             invocation.addParam(id);
@@ -310,7 +308,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public int start() {
+    public int start() throws Exception {
         try {
             Invocation invocation = new Invocation("start");
             return (Integer) target.invoke(invocation);
@@ -321,7 +319,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean commit(int transactionId) {
+    public boolean commit(int transactionId) throws Exception {
         try {
             Invocation invocation = new Invocation("commit");
             invocation.addParam(transactionId);
@@ -333,7 +331,7 @@ public class RMIResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean abort(int transactionId) {
+    public boolean abort(int transactionId) throws Exception {
         try {
             Invocation invocation = new Invocation("abort");
             invocation.addParam(transactionId);

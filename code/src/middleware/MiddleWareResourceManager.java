@@ -46,68 +46,68 @@ public class MiddleWareResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean addFlight(int id, int flightNumber, int numSeats, int flightPrice) {
+    public boolean addFlight(int id, int flightNumber, int numSeats, int flightPrice) throws Exception {
         return handleOperation(id, flightRM).addFlight(id, flightNumber, numSeats, flightPrice);
     }
 
     @Override
-    public boolean deleteFlight(int id, int flightNumber) {
+    public boolean deleteFlight(int id, int flightNumber) throws Exception {
         return handleOperation(id, flightRM).deleteFlight(id, flightNumber);
     }
 
     @Override
-    public int queryFlight(int id, int flightNumber) {
+    public int queryFlight(int id, int flightNumber) throws Exception {
         return handleOperation(id, flightRM).queryFlight(id, flightNumber);
     }
 
     @Override
-    public int queryFlightPrice(int id, int flightNumber) {
+    public int queryFlightPrice(int id, int flightNumber) throws Exception {
         return handleOperation(id, flightRM).queryFlightPrice(id, flightNumber);
     }
 
     @Override
-    public boolean addCars(int id, String location, int numCars, int carPrice) {
+    public boolean addCars(int id, String location, int numCars, int carPrice) throws Exception {
         return handleOperation(id, carRM).addCars(id, location, numCars, carPrice);
     }
 
     @Override
-    public boolean deleteCars(int id, String location) {
+    public boolean deleteCars(int id, String location) throws Exception {
         return handleOperation(id, carRM).deleteCars(id, location);
     }
 
     @Override
-    public int queryCars(int id, String location) {
+    public int queryCars(int id, String location) throws Exception {
         handleOperation(id, carRM);
         return handleOperation(id, carRM).queryCars(id, location);
     }
 
     @Override
-    public int queryCarsPrice(int id, String location) {
+    public int queryCarsPrice(int id, String location) throws Exception {
         return handleOperation(id, carRM).queryCarsPrice(id, location);
     }
 
     @Override
-    public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
+    public boolean addRooms(int id, String location, int numRooms, int roomPrice) throws Exception {
         return handleOperation(id, roomRM).addRooms(id, location, numRooms, roomPrice);
     }
 
     @Override
-    public boolean deleteRooms(int id, String location) {
+    public boolean deleteRooms(int id, String location) throws Exception {
         return handleOperation(id, roomRM).deleteRooms(id, location);
     }
 
     @Override
-    public int queryRooms(int id, String location) {
+    public int queryRooms(int id, String location) throws Exception {
         return handleOperation(id, roomRM).queryRooms(id, location);
     }
 
     @Override
-    public int queryRoomsPrice(int id, String location) {
+    public int queryRoomsPrice(int id, String location) throws Exception {
         return handleOperation(id, roomRM).queryRoomsPrice(id, location);
     }
 
     @Override
-    public int newCustomer(int id) {
+    public int newCustomer(int id) throws Exception {
         IResourceManager whoToCall = handleOperation(id, this);
         if (whoToCall == this) { // Don't actually call (infinite recursion) just do the work straight up
             Trace.info("MW::newCustomer(" + id + ")");
@@ -124,7 +124,7 @@ public class MiddleWareResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean newCustomerId(int id, int customerId) {
+    public boolean newCustomerId(int id, int customerId) throws Exception {
         IResourceManager whoToCall = handleOperation(id, this);
         if (whoToCall == this) {
             Trace.info("MW::newCustomer(" + id + ", " + customerId + ")");
@@ -150,7 +150,7 @@ public class MiddleWareResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean deleteCustomer(int id, int customerId) {
+    public boolean deleteCustomer(int id, int customerId) throws Exception {
         IResourceManager whoToCall = handleOperation(id, this);
         if (whoToCall == this) {
             Trace.info("MW::deleteCustomer(" + id + ", " + customerId + ")");
@@ -176,7 +176,7 @@ public class MiddleWareResourceManager implements IResourceManager {
     }
 
     @Override
-    public String queryCustomerInfo(int id, int customerId) {
+    public String queryCustomerInfo(int id, int customerId) throws Exception {
         IResourceManager whoToCall = handleOperation(id, this);
         if (whoToCall == this) {
             Trace.info("MW::queryCustomerInfo(" + id + ", " + customerId + ")");
@@ -202,22 +202,22 @@ public class MiddleWareResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean reserveFlight(int id, int customerId, int flightNumber) {
+    public boolean reserveFlight(int id, int customerId, int flightNumber) throws Exception {
         return handleOperation(id, flightRM).reserveFlight(id, customerId, flightNumber);
     }
 
     @Override
-    public boolean reserveCar(int id, int customerId, String location) {
+    public boolean reserveCar(int id, int customerId, String location) throws Exception {
         return handleOperation(id, carRM).reserveCar(id, customerId, location);
     }
 
     @Override
-    public boolean reserveRoom(int id, int customerId, String location) {
+    public boolean reserveRoom(int id, int customerId, String location) throws Exception {
         return handleOperation(id, roomRM).reserveRoom(id, customerId, location);
     }
 
     @Override
-    public boolean reserveItinerary(int id, int customerId, Vector flightNumbers, String location, boolean car, boolean room) {
+    public boolean reserveItinerary(int id, int customerId, Vector flightNumbers, String location, boolean car, boolean room) throws Exception {
         IResourceManager whoToCall = handleOperation(id, this);
         if (whoToCall == this) {
             Trace.info("MW::reserveItinerary(" + id + ", " + customerId + ", ...)");
@@ -269,12 +269,12 @@ public class MiddleWareResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean commit(int transactionId) {
+    public boolean commit(int transactionId) throws Exception {
         return TM.commit(transactionId);
     }
 
     @Override
-    public boolean abort(int transactionId) {
+    public boolean abort(int transactionId) throws Exception {
         return TM.abort(transactionId);
     }
 }

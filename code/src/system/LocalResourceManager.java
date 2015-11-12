@@ -5,6 +5,7 @@
 
 package system;
 
+import locks.DeadlockException;
 import server.Trace;
 
 import java.util.*;
@@ -45,7 +46,7 @@ public class LocalResourceManager implements IResourceManager {
     // Basic operations on ReservableItem //
 
     // Delete the entire item.
-    protected boolean deleteItem(int id, String key) {
+    protected boolean deleteItem(int id, String key) throws DeadlockException {
         Trace.info("RM::deleteItem(" + id + ", " + key + ")");
         ReservableItem curObj = (ReservableItem) readData(id, key);
         // Check if there is such an item in the storage.
@@ -75,7 +76,7 @@ public class LocalResourceManager implements IResourceManager {
     }
 
     // Query the number of available seats/rooms/cars.
-    protected int queryNum(int id, String key) {
+    protected int queryNum(int id, String key) throws DeadlockException {
         Trace.info("RM::queryNum(" + id + ", " + key + ")");
         ReservableItem curObj = (ReservableItem) readData(id, key);
         int value = 0;
@@ -92,7 +93,7 @@ public class LocalResourceManager implements IResourceManager {
     }
 
     // Query the price of an item.
-    protected int queryPrice(int id, String key) {
+    protected int queryPrice(int id, String key) throws DeadlockException {
         Trace.info("RM::queryCarsPrice(" + id + ", " + key + ")");
         ReservableItem curObj = (ReservableItem) readData(id, key);
         int value = 0;
@@ -110,7 +111,7 @@ public class LocalResourceManager implements IResourceManager {
 
     // Reserve an item.
     protected boolean reserveItem(int id, int customerId,
-                                  String key, String location) {
+                                  String key, String location) throws DeadlockException {
         Trace.info("RM::reserveItem(" + id + ", " + customerId + ", "
                 + key + ", " + location + ")");
         // Read customer object if it exists (and read lock it).
@@ -170,7 +171,7 @@ public class LocalResourceManager implements IResourceManager {
     // its current price.
     @Override
     public boolean addFlight(int id, int flightNumber,
-                             int numSeats, int flightPrice) {
+                             int numSeats, int flightPrice) throws Exception {
         Trace.info("RM::addFlight(" + id + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ")");
         Flight curObj = (Flight) readData(id, Flight.getKey(flightNumber));
@@ -204,18 +205,18 @@ public class LocalResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean deleteFlight(int id, int flightNumber) {
+    public boolean deleteFlight(int id, int flightNumber) throws Exception {
         return deleteItem(id, Flight.getKey(flightNumber));
     }
 
     // Returns the number of empty seats on this flight.
     @Override
-    public int queryFlight(int id, int flightNumber) {
+    public int queryFlight(int id, int flightNumber) throws Exception {
         return queryNum(id, Flight.getKey(flightNumber));
     }
 
     // Returns price of this flight.
-    public int queryFlightPrice(int id, int flightNumber) {
+    public int queryFlightPrice(int id, int flightNumber) throws Exception {
         return queryPrice(id, Flight.getKey(flightNumber));
     }
 
@@ -262,7 +263,7 @@ public class LocalResourceManager implements IResourceManager {
     // Note: if price <= 0 and the car location already exists, it maintains
     // its current price.
     @Override
-    public boolean addCars(int id, String location, int numCars, int carPrice) {
+    public boolean addCars(int id, String location, int numCars, int carPrice) throws Exception {
         Trace.info("RM::addCars(" + id + ", " + location + ", "
                 + numCars + ", $" + carPrice + ")");
         Car curObj = (Car) readData(id, Car.getKey(location));
@@ -297,19 +298,19 @@ public class LocalResourceManager implements IResourceManager {
 
     // Delete cars from a location.
     @Override
-    public boolean deleteCars(int id, String location) {
+    public boolean deleteCars(int id, String location) throws Exception {
         return deleteItem(id, Car.getKey(location));
     }
 
     // Returns the number of cars available at a location.
     @Override
-    public int queryCars(int id, String location) {
+    public int queryCars(int id, String location) throws Exception {
         return queryNum(id, Car.getKey(location));
     }
 
     // Returns price of cars at this location.
     @Override
-    public int queryCarsPrice(int id, String location) {
+    public int queryCarsPrice(int id, String location) throws Exception {
         return queryPrice(id, Car.getKey(location));
     }
 
@@ -320,7 +321,7 @@ public class LocalResourceManager implements IResourceManager {
     // Note: if price <= 0 and the room location already exists, it maintains
     // its current price.
     @Override
-    public boolean addRooms(int id, String location, int numRooms, int roomPrice) {
+    public boolean addRooms(int id, String location, int numRooms, int roomPrice) throws Exception {
         Trace.info("RM::addRooms(" + id + ", " + location + ", "
                 + numRooms + ", $" + roomPrice + ")");
         Room curObj = (Room) readData(id, Room.getKey(location));
@@ -355,19 +356,19 @@ public class LocalResourceManager implements IResourceManager {
 
     // Delete rooms from a location.
     @Override
-    public boolean deleteRooms(int id, String location) {
+    public boolean deleteRooms(int id, String location) throws Exception {
         return deleteItem(id, Room.getKey(location));
     }
 
     // Returns the number of rooms available at a location.
     @Override
-    public int queryRooms(int id, String location) {
+    public int queryRooms(int id, String location) throws Exception {
         return queryNum(id, Room.getKey(location));
     }
 
     // Returns room price at this location.
     @Override
-    public int queryRoomsPrice(int id, String location) {
+    public int queryRoomsPrice(int id, String location) throws Exception {
         return queryPrice(id, Room.getKey(location));
     }
 
@@ -375,7 +376,7 @@ public class LocalResourceManager implements IResourceManager {
     // Customer operations //
 
     @Override
-    public int newCustomer(int id) {
+    public int newCustomer(int id) throws Exception {
         Trace.info("RM::newCustomer(" + id + ")");
         // Generate a globally unique Id for the new customer.
         int customerId = Integer.parseInt(String.valueOf(id) +
@@ -389,7 +390,7 @@ public class LocalResourceManager implements IResourceManager {
 
     // This method makes testing easier.
     @Override
-    public boolean newCustomerId(int id, int customerId) {
+    public boolean newCustomerId(int id, int customerId) throws Exception {
         Trace.info("RM::newCustomer(" + id + ", " + customerId + ")");
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
@@ -406,7 +407,7 @@ public class LocalResourceManager implements IResourceManager {
 
     // Delete customer from the database.
     @Override
-    public boolean deleteCustomer(int id, int customerId) {
+    public boolean deleteCustomer(int id, int customerId) throws Exception {
         Trace.info("RM::deleteCustomer(" + id + ", " + customerId + ")");
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
@@ -453,7 +454,7 @@ public class LocalResourceManager implements IResourceManager {
     // Return data structure containing customer reservation info.
     // Returns null if the customer doesn't exist.
     // Returns empty RMHashtable if customer exists but has no reservations.
-    public RMHashtable getCustomerReservations(int id, int customerId) {
+    public RMHashtable getCustomerReservations(int id, int customerId) throws Exception {
         Trace.info("RM::getCustomerReservations(" + id + ", "
                 + customerId + ")");
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
@@ -476,7 +477,7 @@ public class LocalResourceManager implements IResourceManager {
 
     // Return a bill.
     @Override
-    public String queryCustomerInfo(int id, int customerId) {
+    public String queryCustomerInfo(int id, int customerId) throws Exception {
         Trace.info("RM::queryCustomerInfo(" + id + ", " + customerId + ")");
         Customer cust = (Customer) readData(id, Customer.getKey(customerId));
         if (cust == null) {
@@ -504,20 +505,20 @@ public class LocalResourceManager implements IResourceManager {
 
     // Add flight reservation to this customer.
     @Override
-    public boolean reserveFlight(int id, int customerId, int flightNumber) {
+    public boolean reserveFlight(int id, int customerId, int flightNumber) throws Exception {
         return reserveItem(id, customerId,
                 Flight.getKey(flightNumber), String.valueOf(flightNumber));
     }
 
     // Add car reservation to this customer.
     @Override
-    public boolean reserveCar(int id, int customerId, String location) {
+    public boolean reserveCar(int id, int customerId, String location) throws Exception {
         return reserveItem(id, customerId, Car.getKey(location), location);
     }
 
     // Add room reservation to this customer.
     @Override
-    public boolean reserveRoom(int id, int customerId, String location) {
+    public boolean reserveRoom(int id, int customerId, String location) throws Exception {
         return reserveItem(id, customerId, Room.getKey(location), location);
     }
 
@@ -525,25 +526,30 @@ public class LocalResourceManager implements IResourceManager {
     // Reserve an itinerary.
     @Override
     public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
-                                    String location, boolean car, boolean room) {
+                                    String location, boolean car, boolean room) throws Exception {
         return false;
     }
 
     /* Not actually used in this implementation, only in MiddleWareResourceManager */
     @Override
-    public int start() {
+    public int start() throws Exception {
         return 0;
     }
 
-    /* Not actually used in this implementation, only in MiddleWareResourceManager */
     @Override
-    public boolean commit(int transactionId) {
+    public boolean start(int transactionId) throws Exception {
         return false;
     }
 
     /* Not actually used in this implementation, only in MiddleWareResourceManager */
     @Override
-    public boolean abort(int transactionId) {
+    public boolean commit(int transactionId) throws Exception {
+        return false;
+    }
+
+    /* Not actually used in this implementation, only in MiddleWareResourceManager */
+    @Override
+    public boolean abort(int transactionId) throws Exception {
         return false;
     }
 }

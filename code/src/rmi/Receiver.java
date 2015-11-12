@@ -66,7 +66,7 @@ public class Receiver implements Runnable {
             e.printStackTrace();
             return Response.error(e);
         } catch (Exception e) {
-            System.err.println("Error in response");
+            System.err.println("Uncaught exception, bundling with response");
             e.printStackTrace();
             return Response.error(e);
         }

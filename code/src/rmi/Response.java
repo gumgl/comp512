@@ -6,6 +6,14 @@ public class Response implements Serializable {
     private Object returnValue;
     private Exception exception = null;
 
+    public Response(Object returnValue, Exception e) {
+        this.returnValue = returnValue;
+    }
+    public Response(Object returnValue) {
+        this.returnValue = returnValue;
+    }
+
+    /* Static constructor to bundle Exception within Response */
     public static Response error(Exception e) {
         return new Response(false, e);
     }
@@ -21,10 +29,4 @@ public class Response implements Serializable {
     @Override
     public String toString() { return returnValue.toString();}
 
-    public Response(Object returnValue, Exception e) {
-        this.returnValue = returnValue;
-    }
-    public Response(Object returnValue) {
-        this.returnValue = returnValue;
-    }
 }
