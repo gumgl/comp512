@@ -3,7 +3,7 @@ package transactions;
 import locks.DeadlockException;
 import locks.LockManager;
 import server.Trace;
-import system.IResourceManager;
+import system.ResourceManager;
 import system.RMHashtable;
 import system.RMItem;
 import transactions.Transaction.State;
@@ -23,12 +23,12 @@ public class TransactionManager {
     protected Transaction getTransaction(int id) {
         return transactions.get(id);
     }
-    /*public IResourceManager getTransactionBuffer(int id) {
+    /*public ResourceManager getTransactionBuffer(int id) {
         return transactions.get(id).rm;
     }*/
 
-    /* Add a IResourceManager to the list of involved RMs */
-    public boolean enlist(int tid, IResourceManager rm) {
+    /* Add a ResourceManager to the list of involved RMs */
+    public boolean enlist(int tid, ResourceManager rm) {
         Transaction t = getTransaction(tid);
         if (t == null || t.state != State.STARTED)
             return false;
@@ -42,6 +42,8 @@ public class TransactionManager {
     public RMItem read(int tid, String key) throws DeadlockException {
         synchronized(items) {
             Transaction t = getTransaction(tid);
+            if (t == null)
+                return null;
             if (!t.isAwareOf(key)) { // Item not seen before
                 Trace.info(String.format("Read new item %s for T%d", key, tid));
                 RMItem value = (RMItem) items.get(key); // Get from RM
@@ -66,6 +68,8 @@ public class TransactionManager {
         synchronized(items) {
             Transaction t = getTransaction(tid);
 
+            if (t == null)
+                return;
             if (!t.isAwareOf(key)) { // Item not seen before
                 Trace.info(String.format("Write new item %s for T%d", key, tid));
                 Trace.info("Requesting WRITE lock...");
@@ -112,7 +116,7 @@ public class TransactionManager {
                 t.state = State.COMMITTED;
                 // Notify all enlisted RMs to commit
                 // Might take a long time while we have a lock on t but that's fine since we're ending t
-                for (IResourceManager rm : t.enlistedRMs)
+                for (ResourceManager rm : t.enlistedRMs)
                     rm.commit(tid);
                 return true;
             }
@@ -128,7 +132,7 @@ public class TransactionManager {
                 return false;
             else {
                 t.state = State.ABORTED;
-                for (IResourceManager rm : t.enlistedRMs)
+                for (ResourceManager rm : t.enlistedRMs)
                     rm.abort(tid);
                 return true;
             }

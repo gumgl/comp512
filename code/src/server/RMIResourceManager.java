@@ -7,7 +7,7 @@ package server;
 
 import rmi.Invocation;
 import rmi.Invokable;
-import system.IResourceManager;
+import system.ResourceManager;
 
 import java.util.Vector;
 
@@ -15,7 +15,7 @@ import java.util.Vector;
  * This class will forward all RM calls to an RMI.Invokable and return the result
  */
 
-public class RMIResourceManager implements IResourceManager {
+public class RMIResourceManager extends ResourceManager {
 
     protected Invokable target;
 
@@ -348,6 +348,19 @@ public class RMIResourceManager implements IResourceManager {
             Invocation invocation = new Invocation("abort");
             invocation.addParam(transactionId);
             return (Boolean) target.invoke(invocation);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    @Override
+    public boolean shutdown() {
+        try {
+            Invocation invocation = new Invocation("shutdown");
+            boolean success = (Boolean) target.invoke(invocation);
+            active = !success;
+            return success;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

@@ -2,8 +2,7 @@ package server;
 
 
 import system.*;
-import system.IResourceManager;
-import transactions.TransactionManager;
+import system.ResourceManager;
 
 import java.io.IOException;
 
@@ -41,12 +40,8 @@ public class RMServer extends Server {
     }
 
     @Override
-    protected IResourceManager setupResourceManager() {
+    protected ResourceManager setupResourceManager() {
         return new LocalResourceManager();
     }
 
-    @Override
-    public boolean shutdown() {
-        return false;
-    }
 }

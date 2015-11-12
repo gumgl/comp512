@@ -2,7 +2,7 @@ package client;
 
 import rmi.SocketSender;
 import server.RMIResourceManager;
-import system.IResourceManager;
+import system.ResourceManager;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -11,7 +11,7 @@ import java.io.*;
 
 public class Client {
 
-    IResourceManager proxy;
+    ResourceManager proxy;
 
     public Client(InetAddress host, int port)
     throws Exception {
@@ -601,11 +601,29 @@ public class Client {
                 }
                 try {
                     int transactionId = getInt(arguments.elementAt(1));
-                    boolean success = proxy.commit(transactionId);
+                    boolean success = proxy.abort(transactionId);
                     if (success)
                         System.out.printf("Transaction %d aborted.\n", transactionId);
                     else
                         System.out.printf("Abort failed for transaction %d.\n", transactionId);
+                } catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
+                break;
+            }
+            case 26: { //shutdown
+                if (arguments.size() != 1) {
+                    wrongNumber();
+                    break;
+                }
+                try {
+                    boolean success = proxy.shutdown();
+                    if (success)
+                        System.out.println("Servers shut down.");
+                    else
+                        System.out.println("Servers not shut down.");
                 } catch(Exception e) {
                     System.out.println("EXCEPTION: ");
                     System.out.println(e.getMessage());
@@ -683,6 +701,8 @@ public class Client {
             return 24;
         else if (argument.compareToIgnoreCase("abort") == 0)
             return 25;
+        else if (argument.compareToIgnoreCase("shutdown") == 0)
+            return 26;
         else
             return 666;
     }
@@ -695,7 +715,7 @@ public class Client {
         System.out.println("deletecustomer\nqueryflight\nquerycar\nqueryroom\nquerycustomer");
         System.out.println("queryflightprice\nquerycarprice\nqueryroomprice");
         System.out.println("reserveflight\nreservecar\nreserveroom\nitinerary");
-        System.out.println("start\ncommit\nabort");
+        System.out.println("start\ncommit\nabort\nshutdown");
         System.out.println("quit");
         System.out.println("\ntype help, <commandname> for detailed info (note the use of comma).");
     }
@@ -899,6 +919,15 @@ public class Client {
                 break;
 
             case 25:  //abort transaction
+                System.out.println("Abort the current transaction");
+                System.out.println("Purpose: Cancels all the operations");
+                System.out.println("\t");
+                System.out.println("\nUsage: ");
+                System.out.println("\tabort");
+                break;
+
+            case 26:  //shutdown all servers
+                // TODO: change text
                 System.out.println("Abort the current transaction");
                 System.out.println("Purpose: Cancels all the operations");
                 System.out.println("\t");

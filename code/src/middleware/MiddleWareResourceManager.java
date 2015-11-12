@@ -1,7 +1,8 @@
 package middleware;
 
+import server.RMIResourceManager;
 import server.Trace;
-import system.IResourceManager;
+import system.ResourceManager;
 import system.LocalResourceManager;
 import transactions.InvalidTransactionIDException;
 import transactions.TransactionManager;
@@ -10,29 +11,29 @@ import java.util.Vector;
 import java.util.concurrent.ConcurrentHashMap;
 
 //TODO: Find a way to accumulate operations' RMIs until commit
-public class MiddlewareResourceManager implements IResourceManager {
+public class MiddlewareResourceManager extends ResourceManager {
 
-    IResourceManager flightRM;
-    IResourceManager carRM;
-    IResourceManager roomRM;
-    IResourceManager customerRM = new LocalResourceManager();
+    RMIResourceManager flightRM;
+    RMIResourceManager carRM;
+    RMIResourceManager roomRM;
+    LocalResourceManager customerRM = new LocalResourceManager();
     TransactionManager TM;
-    private final ConcurrentHashMap<Integer, Integer> customerIds =
-            new ConcurrentHashMap<Integer, Integer>();
+    /*private final ConcurrentHashMap<Integer, Integer> customerIds =
+            new ConcurrentHashMap<Integer, Integer>();*/
 
-    public MiddlewareResourceManager(IResourceManager flightRM,
-                                     IResourceManager carRM,
-                                     IResourceManager roomRM) {
+    public MiddlewareResourceManager(RMIResourceManager flightRM,
+                                     RMIResourceManager carRM,
+                                     RMIResourceManager roomRM) {
         this.flightRM = flightRM;
         this.carRM = carRM;
         this.roomRM = roomRM;
 
-        this.TM = new TransactionManager(); // TODO: Do we really need a TransactionManager at the MiddleWare level?
+        this.TM = new TransactionManager(); // We need it for
     }
 
     /* Same logic for all operations.
      * Returns the correct RM on which the operation should be executed */
-    private IResourceManager handleOperation(int tid, IResourceManager relevantRM) throws InvalidTransactionIDException {
+    private ResourceManager handleOperation(int tid, ResourceManager relevantRM) throws InvalidTransactionIDException {
         if (!TM.isTransactionIdValid(tid)) {
             String message = String.format("Transaction #%d is not valid\n",tid);
             Trace.error(message);
@@ -135,19 +136,18 @@ public class MiddlewareResourceManager implements IResourceManager {
 
     @Override
     public String queryCustomerInfo(int tid, int customerId) throws Exception {
-        IResourceManager whoToCall = handleOperation(tid, this);
-        if (whoToCall == this) {
-            Trace.info("MW::queryCustomerInfo(" + tid + ", " + customerId + ")");
+        Trace.info("MW::queryCustomerInfo(" + tid + ", " + customerId + ")");
+        handleOperation(tid, customerRM);
+        if (customerRM.getCustomerReservations(tid, customerId) == null) { // Customer does not exist
+            Trace.info("MW::deleteCustomer(" + tid + ", " + customerId +
+                    ") failed: customer doesn't exist.");
+            return "";
+        } else {
             String s = "";
-            if (!customerIds.containsKey(customerId)) {
-                Trace.info("MW::deleteCustomer(" + tid + ", " + customerId +
-                        ") failed: customer doesn't exist.");
-                return "";
-            }
             try {
-                s = s + flightRM.queryCustomerInfo(tid, customerId) + "\n";
-                s = s + carRM.queryCustomerInfo(tid, customerId) + "\n";
-                s = s + roomRM.queryCustomerInfo(tid, customerId) + "\n";
+                s = s + handleOperation(tid, flightRM).queryCustomerInfo(tid, customerId) + "\n";
+                s = s + handleOperation(tid, carRM).queryCustomerInfo(tid, customerId) + "\n";
+                s = s + handleOperation(tid, roomRM).queryCustomerInfo(tid, customerId) + "\n";
             } catch (Exception e) {
                 e.printStackTrace();
                 return "-1";
@@ -155,8 +155,7 @@ public class MiddlewareResourceManager implements IResourceManager {
             Trace.info("MW::queryCustomerInfo(" + tid + ", " + customerId + "): \n");
             System.out.println(s);
             return s;
-        } else
-            return whoToCall.queryCustomerInfo(tid, customerId);
+        }
     }
 
     @Override
@@ -176,49 +175,43 @@ public class MiddlewareResourceManager implements IResourceManager {
 
     @Override
     public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers, String location, boolean car, boolean room) throws Exception {
-        IResourceManager whoToCall = handleOperation(tid, this);
-        if (whoToCall == this) {
-            Trace.info("MW::reserveItinerary(" + tid + ", " + customerId + ", ...)");
-            if (!customerIds.containsKey(customerId)) {
-                Trace.info("MW::reserveItinerary(" + tid + ", " + customerId +
-                        ", ...) failed: customer doesn't exist.");
-                return false;
+        Trace.info("MW::reserveItinerary(" + tid + ", " + customerId + ", ...)");
+        handleOperation(tid, customerRM);
+        if (customerRM.getCustomerReservations(tid, customerId) == null) { // Customer does not exist
+            Trace.info("MW::reserveItinerary(" + tid + ", " + customerId +
+                    ", ...) failed: customer doesn't exist.");
+            return false;
+        }
+        boolean r = true;
+        try {
+            for (Object o : flightNumbers) {
+                int flightNumber = Integer.parseInt((String) o);
+                r &= reserveFlight(tid, customerId, flightNumber);
+                Trace.info("MW: Reserve flight " + (r ? "OK" : "Failed"));
             }
-            boolean r = true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        if (car) {
             try {
-                for (Object o : flightNumbers) {
-                    handleOperation(tid, flightRM); // TODO: Perhaps only enlist if operation is successful
-                    int flightNumber = Integer.parseInt((String) o);
-                    r &= reserveFlight(tid, customerId, flightNumber);
-                    Trace.info("MW: Reserve flight " + (r ? "OK" : "Failed"));
-                }
+                r &= reserveCar(tid, customerId, location);
+                Trace.info("MW: Reserve car " + (r ? "OK" : "Failed"));
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
-            if (car) {
-                try {
-                    handleOperation(tid, carRM);
-                    r &= reserveCar(tid, customerId, location);
-                    Trace.info("MW: Reserve car " + (r ? "OK" : "Failed"));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
+        }
+        if (room) {
+            try {
+                r &= reserveRoom(tid, customerId, location);
+                Trace.info("MW: Reserve room " + (r ? "OK" : "Failed"));
+            } catch (Exception e) {
+                e.printStackTrace();
+                return false;
             }
-            if (room) {
-                try {
-                    handleOperation(tid, roomRM);
-                    r &= reserveRoom(tid, customerId, location);
-                    Trace.info("MW: Reserve room " + (r ? "OK" : "Failed"));
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return false;
-                }
-            }
-            return r;
-        } else
-            return whoToCall.reserveItinerary(tid, customerId, flightNumbers, location, car, room);
+        }
+        return r;
     }
 
     @Override
@@ -256,5 +249,15 @@ public class MiddlewareResourceManager implements IResourceManager {
     public boolean abort(int transactionId) throws Exception {
         Trace.info(String.format("MW::abort(%d)", transactionId));
         return TM.abort(transactionId);
+    }
+
+    @Override
+    public boolean shutdown() {
+        boolean success = true;
+        success &= flightRM.shutdown();
+        success &= carRM.shutdown();
+        success &= roomRM.shutdown();
+        active = !success;
+        return success;
     }
 }

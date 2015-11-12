@@ -1,6 +1,7 @@
 package rmi;
 
 import server.Trace;
+import system.ResourceManager;
 
 import java.lang.reflect.Method;
 import java.net.*;
@@ -13,9 +14,9 @@ public class Receiver implements Runnable {
     Socket clientSocket;
     ObjectInputStream inStream;
     ObjectOutputStream outputStream;
-    Object localResource;
+    ResourceManager localResource;
 
-    public Receiver(Socket clientSocket, Object localResource) {
+    public Receiver(Socket clientSocket, ResourceManager localResource) {
         this.clientSocket = clientSocket;
         this.localResource = localResource;
     }
@@ -30,13 +31,14 @@ public class Receiver implements Runnable {
             inStream = new ObjectInputStream(clientSocket.getInputStream());
             Trace.info("InputStream created");
 
-            while(true) { // Read requests forever...
+            while(localResource.active) { // Read requests forever...
                 Trace.info("Waiting for an Invocation...");
                 Invocation invocation = (Invocation) inStream.readObject();
                 Response response = handleRMI(invocation);
                 Trace.info("Sending back response...");
                 outputStream.writeObject(response);
             }
+            Trace.info("This receiver stops receiving.");
         } catch(SocketException e) {
             Trace.info("Client disconnected (" + e + ")");
         } catch (Exception e) {

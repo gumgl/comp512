@@ -4,7 +4,7 @@ import rmi.SocketSender;
 import server.RMIResourceManager;
 import server.Server;
 import server.Trace;
-import system.IResourceManager;
+import system.ResourceManager;
 
 import java.io.IOException;
 import java.net.*;
@@ -42,17 +42,12 @@ public class MiddlewareServer extends Server {
     }
 
     @Override
-    protected IResourceManager setupResourceManager() {
+    protected ResourceManager setupResourceManager() {
         Trace.info("Trying to connect to the ResourceManagers...");
         // the MiddlewareResourceManager will forward all received RMIs to the specific RMs
         return new MiddlewareResourceManager(
                 new RMIResourceManager(new SocketSender(RMaddresses.get(0), RMports.get(0))),
                 new RMIResourceManager(new SocketSender(RMaddresses.get(1), RMports.get(1))),
                 new RMIResourceManager(new SocketSender(RMaddresses.get(2), RMports.get(2))));
-    }
-
-    @Override
-    public boolean shutdown() {
-        return false;
     }
 }

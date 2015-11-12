@@ -31,7 +31,6 @@ public class SocketSender implements Invokable {
                 inStream = new ObjectInputStream(serverSocket.getInputStream());
 
                 break; // Successful connection, break out of loop
-
             } catch(IOException e){
                 Trace.error("Failed, trying again...");
             }

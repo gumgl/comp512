@@ -6,9 +6,7 @@
 package system;
 
 import locks.DeadlockException;
-import locks.LockManager;
 import server.Trace;
-import transactions.Transaction;
 import transactions.TransactionManager;
 
 import java.util.*;
@@ -16,8 +14,9 @@ import javax.jws.WebService;
 
 
 @WebService(targetNamespace = "http://ns",
-        endpointInterface = "system.IResourceManager")
-public class LocalResourceManager implements IResourceManager {
+        endpointInterface = "system.ResourceManager")
+public class LocalResourceManager extends ResourceManager {
+    public boolean active = true;
 
     /* One transaction manager shared among threads */
     public final TransactionManager TM = new TransactionManager();
@@ -498,7 +497,7 @@ public class LocalResourceManager implements IResourceManager {
                 s = cust.printBill();
             }
             Trace.info("RM::queryCustomerInfo(" + tid + ", " + customerId + "): \n");
-            System.out.println(s);
+            Trace.info(s);
             return s;
         }
     }
@@ -554,5 +553,11 @@ public class LocalResourceManager implements IResourceManager {
     public boolean abort(int transactionId) throws Exception {
         Trace.info(String.format("RM::abort(%d)", transactionId));
         return TM.abort(transactionId);
+    }
+
+    @Override
+    public boolean shutdown() {
+        active = false;
+        return true;
     }
 }

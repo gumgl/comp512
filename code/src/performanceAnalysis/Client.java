@@ -1,19 +1,19 @@
 package performanceAnalysis;
 
 import server.RMIResourceManager;
-import system.IResourceManager;
 
 import java.net.InetAddress;
 import java.util.*;
 
 import rmi.SocketSender;
+import system.ResourceManager;
 
 import java.io.*;
 
 
 public class Client {
 
-    IResourceManager proxy;
+    ResourceManager proxy;
 
     public Client(InetAddress host, int port)
     throws Exception {
@@ -22,10 +22,21 @@ public class Client {
 
     public static void main(String[] args) {
         try {
+        	
+        	ArrayList<Long> execTimeList = new ArrayList<Long>();
+        	long execTime = 0;
+        	
+        	Scanner scanner = new Scanner(System.in);
         
-            if (args.length != 2) {
-                System.out.println("Usage: MyClient <host> <port>");
-                System.exit(-1);
+        	if (args.length == 0)
+            {
+            	args = new String[2];
+            	
+            	System.out.print("enter host ip: ");
+            	args[0] = scanner.nextLine();
+            	
+            	System.out.print("enter host port: ");
+            	args[1] = scanner.nextLine();
             }
 
             InetAddress host = InetAddress.getByName(args[0]);
@@ -33,7 +44,6 @@ public class Client {
 
             Client client = new Client(host, port);
             
-            Scanner scanner = new Scanner(System.in);
             ArrayList<String> commandArray = new ArrayList<String>();
             
             System.out.println("Type the commands that will be looped (leave a blank line to stop):");
@@ -68,13 +78,31 @@ public class Client {
             	startTime = System.currentTimeMillis();
             	client.run(commandArray);
             	endTime = System.currentTimeMillis();
-            	System.out.println("loop "+(i+1)+": "+Long.toString(endTime-startTime)+" milliseconds");
             	
-            	waitTime = baseWaitTime + rand.nextInt(2*timeVariation)-timeVariation;
+            	execTime = endTime-startTime;
+            	execTimeList.add(execTime);
+            	System.out.println("loop "+(i+1)+": "+Long.toString(execTime)+" milliseconds");
+            	
+            	waitTime = (int)(baseWaitTime + rand.nextInt(2*timeVariation)-timeVariation-execTime);
             	System.out.println("Sleeping for "+waitTime+" milliseconds ...");
             	System.out.println();
             	Thread.sleep(waitTime);
             }
+            
+            scanner.close();
+            
+            System.out.println();
+            System.out.println("All execution times:");
+            long totalTime = 0;
+            for(Long l : execTimeList)
+            {
+            	totalTime += l;
+            	System.out.println(l);
+            }
+            
+            
+            System.out.println("total execution time (without wait time): "+totalTime);
+            System.out.print("average execution time: "+Double.toString(1.0*totalTime/execTimeList.size()));
             
         } catch(Exception e) {
             e.printStackTrace();
