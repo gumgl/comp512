@@ -1,5 +1,7 @@
 package rmi;
 
+import server.Trace;
+
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
@@ -17,11 +19,11 @@ public class SocketSender implements Invokable {
     ObjectInputStream inStream;
 
     public SocketSender(InetAddress host, int port) {
-        System.out.printf("[SocketSender] Connecting to server %s:%d... ",host.toString(),port);
+        Trace.info(String.format("Connecting to server %s:%d... ",host.toString(),port));
         while(true) {
             try {
                 serverSocket = new Socket(host, port);
-                System.out.println("Connected!");
+                Trace.info("Connected!");
                 outStream = new ObjectOutputStream(serverSocket.getOutputStream());
                 //System.out.println("[SocketSender]OutputStream created");
                 outStream.flush();
@@ -31,18 +33,18 @@ public class SocketSender implements Invokable {
                 break; // Successful connection, break out of loop
 
             } catch(IOException e){
-                System.err.printf("\n[SocketSender] Failed, trying again...");
+                Trace.error("Failed, trying again...");
             }
         }
     }
 
     @Override
     public Object invoke(Invocation invocation) throws Exception {
-        System.out.println("[SocketSender] Invoking target." + invocation.toString());
+        Trace.info("Invoking target." + invocation.toString());
         outStream.writeObject(invocation);
-        System.out.println("[SocketSender] Sent! Waiting for response...");
+        Trace.info("Sent! Waiting for response...");
         Response response = (Response) inStream.readObject();
-        System.out.println("[SocketSender] Response received: " + response.toString());
+        Trace.info("Response received: " + response.toString());
 
         if (response.getException() != null)
             throw response.getException();

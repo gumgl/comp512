@@ -605,9 +605,15 @@ public class Client {
                     wrongNumber();
                     break;
                 }
-                System.out.printf("Starting a transaction with id...");
-                int transactionId = proxy.start();
-                System.out.printf("%d.Done.\n", transactionId);
+                try {
+                    System.out.printf("Starting a transaction with id...");
+                    int transactionId = proxy.start();
+                    System.out.printf("%d.Done.\n", transactionId);
+                } catch(Exception e) {
+                    System.out.println("EXCEPTION: ");
+                    System.out.println(e.getMessage());
+                    e.printStackTrace();
+                }
                 break;
             }
             case 24: { //commit transaction
@@ -713,11 +719,11 @@ public class Client {
         else if (argument.compareToIgnoreCase("newcustomerid") == 0)
             return 22;
         else if (argument.compareToIgnoreCase("start") == 0)
-            return 22;
+            return 23;
         else if (argument.compareToIgnoreCase("commit") == 0)
-            return 22;
+            return 24;
         else if (argument.compareToIgnoreCase("abort") == 0)
-            return 22;
+            return 25;
         else
             return 666;
     }

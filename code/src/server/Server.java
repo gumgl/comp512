@@ -20,19 +20,20 @@ public abstract class Server implements Runnable {
         executorService = Executors.newFixedThreadPool(4);
     }
 
+    /* RM who will receive all RMIs */
     protected abstract IResourceManager setupResourceManager();
 
     /* Accept an incoming socket connection */
     @Override
     public void run() {
-        // Different types of servers have different RMs
+        // Setup our RM receiving the RMIs
         rm = setupResourceManager();
 
         while (true) {
             try {
-                System.out.println("Waiting for a connection over sockets...");
+                Trace.info("Waiting for a connection over sockets...");
                 Socket clientSocket = serverSocket.accept();
-                System.out.println("Connection found!");
+                Trace.info("Connection found!");
                 receiver = new Receiver(clientSocket, rm);
                 executorService.execute(receiver);
             } catch (IOException e) {

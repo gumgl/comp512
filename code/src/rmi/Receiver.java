@@ -1,5 +1,7 @@
 package rmi;
 
+import server.Trace;
+
 import java.lang.reflect.Method;
 import java.net.*;
 import java.io.*;
@@ -26,31 +28,32 @@ public class Receiver implements Runnable {
             outputStream.flush();
 
             inStream = new ObjectInputStream(clientSocket.getInputStream());
-            System.out.println("InputStream created");
+            Trace.info("InputStream created");
 
             while(true) { // Read requests forever...
-                System.out.println("Waiting for an Invocation...");
+                Trace.info("Waiting for an Invocation...");
                 Invocation invocation = (Invocation) inStream.readObject();
                 Response response = handleRMI(invocation);
-                System.out.println("Sending back response...");
+                Trace.info("Sending back response...");
                 outputStream.writeObject(response);
             }
         } catch(SocketException e) {
-            System.out.println("Client disconnected (" + e + ")");
+            Trace.info("Client disconnected (" + e + ")");
         } catch (Exception e) {
-            System.err.println("Socket stream failed!");
+            Trace.error("Socket stream failed!");
             e.printStackTrace();
         }
     }
 
     public Response handleRMI(Invocation invocation) {
-        System.out.println("Received Invocation: " + invocation.toString());
+        Trace.info("Received Invocation: " + invocation.toString());
 
         try {
             // Naive method search going by name and parameter count. Not complete signature (ignores types)
             Method method = null;
             for (Method m : localResource.getClass().getMethods()) { // Search in the RM's methods
                 if (m.getName().equals(invocation.getMethodName()) && m.getParameterCount() == invocation.getParamCount()) {
+                    //System.out.printf("m.getParameterCount()=%d, invocation.getParamCount()=%d\n", m.getParameterCount(), invocation.getParamCount());
                     method = m;
                     break;
                 }
@@ -62,11 +65,11 @@ public class Receiver implements Runnable {
             Object result = method.invoke(localResource, invocation.getParams().toArray());
             return new Response(result);
         } catch (NoSuchMethodException e) {
-            System.err.println("Method not found");
+            Trace.error("Method not found");
             e.printStackTrace();
             return Response.error(e);
         } catch (Exception e) {
-            System.err.println("Uncaught exception, bundling with response");
+            Trace.error("Uncaught exception, bundling with response.");
             e.printStackTrace();
             return Response.error(e);
         }

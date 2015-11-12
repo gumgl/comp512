@@ -7,6 +7,11 @@ public class Invocation implements Serializable {
     private String methodName;
     private ArrayList<Object> params;
 
+    public Invocation(String methodName) {
+        this.methodName = methodName;
+        this.params = new ArrayList<Object>();
+    }
+
     public Invocation(String methodName, ArrayList<Object> params) {
         this.methodName = methodName;
         this.params = params;
@@ -18,11 +23,6 @@ public class Invocation implements Serializable {
 
     public ArrayList<Object> getParams() {
         return params;
-    }
-
-    public Invocation(String methodName) {
-        this.methodName = methodName;
-        this.params = new ArrayList<Object>();
     }
 
     public void setParam(int position, Object p) {

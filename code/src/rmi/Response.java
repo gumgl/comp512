@@ -8,6 +8,7 @@ public class Response implements Serializable {
 
     public Response(Object returnValue, Exception e) {
         this.returnValue = returnValue;
+        this.exception = e;
     }
     public Response(Object returnValue) {
         this.returnValue = returnValue;
@@ -15,7 +16,7 @@ public class Response implements Serializable {
 
     /* Static constructor to bundle Exception within Response */
     public static Response error(Exception e) {
-        return new Response(false, e);
+        return new Response(null, e);
     }
 
     public Object getReturnValue() {
@@ -27,6 +28,6 @@ public class Response implements Serializable {
     }
 
     @Override
-    public String toString() { return returnValue.toString();}
+    public String toString() { return (returnValue == null ? "null" : returnValue.toString());}
 
 }

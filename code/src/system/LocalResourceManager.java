@@ -6,7 +6,10 @@
 package system;
 
 import locks.DeadlockException;
+import locks.LockManager;
 import server.Trace;
+import transactions.Transaction;
+import transactions.TransactionManager;
 
 import java.util.*;
 import javax.jws.WebService;
@@ -16,58 +19,55 @@ import javax.jws.WebService;
         endpointInterface = "system.IResourceManager")
 public class LocalResourceManager implements IResourceManager {
 
-    protected RMHashtable m_itemHT = new RMHashtable();
-
+    /* One transaction manager shared among threads */
+    public final TransactionManager TM = new TransactionManager();
+    //public final LockManager LM = new LockManager();
 
     // Basic operations on RMItem //
 
     // Read a data item.
-    protected RMItem readData(int id, String key) {
-        synchronized(m_itemHT) {
-            return (RMItem) m_itemHT.get(key);
-        }
+    protected RMItem readData(int tid, String key) throws DeadlockException {
+        return TM.read(tid, key);
     }
 
     // Write a data item.
-    protected void writeData(int id, String key, RMItem value) {
-        synchronized(m_itemHT) {
-            m_itemHT.put(key, value);
-        }
+    protected void writeData(int tid, String key, RMItem value) throws DeadlockException {
+        TM.write(tid, key, value);
     }
 
     // Remove the item out of storage.
-    protected RMItem removeData(int id, String key) {
-        synchronized(m_itemHT) {
-            return (RMItem) m_itemHT.remove(key);
-        }
+    protected RMItem removeData(int tid, String key) throws DeadlockException {
+        //RMItem value = TM.read(tid, key);
+        TM.write(tid, key, null);
+        return null; // We should not need to return something here TODO: verify that
     }
 
 
     // Basic operations on ReservableItem //
 
     // Delete the entire item.
-    protected boolean deleteItem(int id, String key) throws DeadlockException {
-        Trace.info("RM::deleteItem(" + id + ", " + key + ")");
-        ReservableItem curObj = (ReservableItem) readData(id, key);
+    protected boolean deleteItem(int tid, String key) throws DeadlockException {
+        Trace.info("RM::deleteItem(" + tid + ", " + key + ")");
+        ReservableItem curObj = (ReservableItem) readData(tid, key);
         // Check if there is such an item in the storage.
         if (curObj == null) {
-            Trace.warn("RM::deleteItem(" + id + ", " + key + ") failed: "
+            Trace.warn("RM::deleteItem(" + tid + ", " + key + ") failed: "
                     + " item doesn't exist.");
             return false;
         } else {
             synchronized (curObj) {
-                curObj = (ReservableItem) readData(id, key);
+                curObj = (ReservableItem) readData(tid, key);
                 if (curObj == null) {
-                    Trace.warn("RM::deleteItem(" + id + ", " + key + ") failed: "
+                    Trace.warn("RM::deleteItem(" + tid + ", " + key + ") failed: "
                             + " item doesn't exist.");
                     return false;
                 }
                 if (curObj.getReserved() == 0) {
-                    removeData(id, curObj.getKey());
-                    Trace.info("RM::deleteItem(" + id + ", " + key + ") OK.");
+                    removeData(tid, curObj.getKey());
+                    Trace.info("RM::deleteItem(" + tid + ", " + key + ") OK.");
                     return true;
                 } else {
-                    Trace.info("RM::deleteItem(" + id + ", " + key + ") failed: "
+                    Trace.info("RM::deleteItem(" + tid + ", " + key + ") failed: "
                             + "some customers have reserved it.");
                     return false;
                 }
@@ -76,86 +76,86 @@ public class LocalResourceManager implements IResourceManager {
     }
 
     // Query the number of available seats/rooms/cars.
-    protected int queryNum(int id, String key) throws DeadlockException {
-        Trace.info("RM::queryNum(" + id + ", " + key + ")");
-        ReservableItem curObj = (ReservableItem) readData(id, key);
+    protected int queryNum(int tid, String key) throws DeadlockException {
+        Trace.info("RM::queryNum(" + tid + ", " + key + ")");
+        ReservableItem curObj = (ReservableItem) readData(tid, key);
         int value = 0;
         if (curObj != null) {
             synchronized (curObj) {
-                curObj = (ReservableItem) readData(id, key);
+                curObj = (ReservableItem) readData(tid, key);
                 if (curObj != null) {
                     value = curObj.getCount();
                 }
             }
         }
-        Trace.info("RM::queryNum(" + id + ", " + key + ") OK: " + value);
+        Trace.info("RM::queryNum(" + tid + ", " + key + ") OK: " + value);
         return value;
     }
 
     // Query the price of an item.
-    protected int queryPrice(int id, String key) throws DeadlockException {
-        Trace.info("RM::queryCarsPrice(" + id + ", " + key + ")");
-        ReservableItem curObj = (ReservableItem) readData(id, key);
+    protected int queryPrice(int tid, String key) throws DeadlockException {
+        Trace.info("RM::queryCarsPrice(" + tid + ", " + key + ")");
+        ReservableItem curObj = (ReservableItem) readData(tid, key);
         int value = 0;
         if (curObj != null) {
             synchronized (curObj) {
-                curObj = (ReservableItem) readData(id, key);
+                curObj = (ReservableItem) readData(tid, key);
                 if (curObj != null) {
                     value = curObj.getPrice();
                 }
             }
         }
-        Trace.info("RM::queryCarsPrice(" + id + ", " + key + ") OK: $" + value);
+        Trace.info("RM::queryCarsPrice(" + tid + ", " + key + ") OK: $" + value);
         return value;
     }
 
     // Reserve an item.
-    protected boolean reserveItem(int id, int customerId,
+    protected boolean reserveItem(int tid, int customerId,
                                   String key, String location) throws DeadlockException {
-        Trace.info("RM::reserveItem(" + id + ", " + customerId + ", "
+        Trace.info("RM::reserveItem(" + tid + ", " + customerId + ", "
                 + key + ", " + location + ")");
         // Read customer object if it exists (and read lock it).
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
+        Customer cust = (Customer) readData(tid, Customer.getKey(customerId));
         if (cust == null) {
-            Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
+            Trace.warn("RM::reserveItem(" + tid + ", " + customerId + ", "
                     + key + ", " + location + ") failed: customer doesn't exist.");
             return false;
         }
         synchronized (cust) {
-            cust = (Customer) readData(id, Customer.getKey(customerId));
+            cust = (Customer) readData(tid, Customer.getKey(customerId));
             if (cust == null) {
-                Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
+                Trace.warn("RM::reserveItem(" + tid + ", " + customerId + ", "
                         + key + ", " + location + ") failed: customer doesn't exist.");
                 return false;
             }
             // Check if the item is available.
-            ReservableItem item = (ReservableItem) readData(id, key);
+            ReservableItem item = (ReservableItem) readData(tid, key);
             if (item == null) {
-                Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
+                Trace.warn("RM::reserveItem(" + tid + ", " + customerId + ", "
                         + key + ", " + location + ") failed: item doesn't exist.");
                 return false;
             }
             synchronized (item) {
-                item = (ReservableItem) readData(id, key);
+                item = (ReservableItem) readData(tid, key);
                 if (item == null) {
-                    Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
+                    Trace.warn("RM::reserveItem(" + tid + ", " + customerId + ", "
                             + key + ", " + location + ") failed: item doesn't exist.");
                     return false;
                 }
                 if (item.getCount() == 0) {
-                    Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
+                    Trace.warn("RM::reserveItem(" + tid + ", " + customerId + ", "
                             + key + ", " + location + ") failed: no more items.");
                     return false;
                 } else {
                     // Do reservation.
                     cust.reserve(key, location, item.getPrice());
-                    writeData(id, cust.getKey(), cust);
+                    writeData(tid, cust.getKey(), cust);
 
                     // Decrease the number of available items in the storage.
                     item.setCount(item.getCount() - 1);
                     item.setReserved(item.getReserved() + 1);
 
-                    Trace.warn("RM::reserveItem(" + id + ", " + customerId + ", "
+                    Trace.warn("RM::reserveItem(" + tid + ", " + customerId + ", "
                             + key + ", " + location + ") OK.");
                     return true;
                 }
@@ -170,22 +170,22 @@ public class LocalResourceManager implements IResourceManager {
     // Note: if flightPrice <= 0 and the flight already exists, it maintains
     // its current price.
     @Override
-    public boolean addFlight(int id, int flightNumber,
+    public boolean addFlight(int tid, int flightNumber,
                              int numSeats, int flightPrice) throws Exception {
-        Trace.info("RM::addFlight(" + id + ", " + flightNumber
+        Trace.info("RM::addFlight(" + tid + ", " + flightNumber
                 + ", $" + flightPrice + ", " + numSeats + ")");
-        Flight curObj = (Flight) readData(id, Flight.getKey(flightNumber));
+        Flight curObj = (Flight) readData(tid, Flight.getKey(flightNumber));
         if (curObj == null) {
             // Doesn't exist; add it.
             Flight newObj = new Flight(flightNumber, numSeats, flightPrice);
-            writeData(id, newObj.getKey(), newObj);
-            Trace.info("RM::addFlight(" + id + ", " + flightNumber
+            writeData(tid, newObj.getKey(), newObj);
+            Trace.info("RM::addFlight(" + tid + ", " + flightNumber
                     + ", $" + flightPrice + ", " + numSeats + ") OK.");
         } else {
             synchronized (curObj) {
-                curObj = (Flight) readData(id, Flight.getKey(flightNumber));
+                curObj = (Flight) readData(tid, Flight.getKey(flightNumber));
                 if (curObj == null) {
-                    Trace.info("RM::addFlight(" + id + ", " + flightNumber
+                    Trace.info("RM::addFlight(" + tid + ", " + flightNumber
                             + ", $" + flightPrice + ", " + numSeats + "): "
                             + "concurrent modification error.");
                     return false;
@@ -195,8 +195,8 @@ public class LocalResourceManager implements IResourceManager {
                 if (flightPrice > 0) {
                     curObj.setPrice(flightPrice);
                 }
-                writeData(id, curObj.getKey(), curObj);
-                Trace.info("RM::addFlight(" + id + ", " + flightNumber
+                writeData(tid, curObj.getKey(), curObj);
+                Trace.info("RM::addFlight(" + tid + ", " + flightNumber
                         + ", $" + flightPrice + ", " + numSeats + ") OK: "
                         + "seats = " + curObj.getCount() + ", price = $" + flightPrice);
             }
@@ -205,19 +205,19 @@ public class LocalResourceManager implements IResourceManager {
     }
 
     @Override
-    public boolean deleteFlight(int id, int flightNumber) throws Exception {
-        return deleteItem(id, Flight.getKey(flightNumber));
+    public boolean deleteFlight(int tid, int flightNumber) throws Exception {
+        return deleteItem(tid, Flight.getKey(flightNumber));
     }
 
     // Returns the number of empty seats on this flight.
     @Override
-    public int queryFlight(int id, int flightNumber) throws Exception {
-        return queryNum(id, Flight.getKey(flightNumber));
+    public int queryFlight(int tid, int flightNumber) throws Exception {
+        return queryNum(tid, Flight.getKey(flightNumber));
     }
 
     // Returns price of this flight.
-    public int queryFlightPrice(int id, int flightNumber) throws Exception {
-        return queryPrice(id, Flight.getKey(flightNumber));
+    public int queryFlightPrice(int tid, int flightNumber) throws Exception {
+        return queryPrice(tid, Flight.getKey(flightNumber));
     }
 
     /*
@@ -263,21 +263,21 @@ public class LocalResourceManager implements IResourceManager {
     // Note: if price <= 0 and the car location already exists, it maintains
     // its current price.
     @Override
-    public boolean addCars(int id, String location, int numCars, int carPrice) throws Exception {
-        Trace.info("RM::addCars(" + id + ", " + location + ", "
+    public boolean addCars(int tid, String location, int numCars, int carPrice) throws Exception {
+        Trace.info("RM::addCars(" + tid + ", " + location + ", "
                 + numCars + ", $" + carPrice + ")");
-        Car curObj = (Car) readData(id, Car.getKey(location));
+        Car curObj = (Car) readData(tid, Car.getKey(location));
         if (curObj == null) {
             // Doesn't exist; add it.
             Car newObj = new Car(location, numCars, carPrice);
-            writeData(id, newObj.getKey(), newObj);
-            Trace.info("RM::addCars(" + id + ", " + location + ", "
+            writeData(tid, newObj.getKey(), newObj);
+            Trace.info("RM::addCars(" + tid + ", " + location + ", "
                     + numCars + ", $" + carPrice + ") OK.");
         } else {
             synchronized (curObj) {
-                curObj = (Car) readData(id, Car.getKey(location));
+                curObj = (Car) readData(tid, Car.getKey(location));
                 if (curObj == null) {
-                    Trace.info("RM::addCars(" + id + ", " + location + ", "
+                    Trace.info("RM::addCars(" + tid + ", " + location + ", "
                             + numCars + ", $" + carPrice + "): "
                             + "concurrent modification error.");
                     return false;
@@ -287,8 +287,8 @@ public class LocalResourceManager implements IResourceManager {
                 if (carPrice > 0) {
                     curObj.setPrice(carPrice);
                 }
-                writeData(id, curObj.getKey(), curObj);
-                Trace.info("RM::addCars(" + id + ", " + location + ", "
+                writeData(tid, curObj.getKey(), curObj);
+                Trace.info("RM::addCars(" + tid + ", " + location + ", "
                         + numCars + ", $" + carPrice + ") OK: "
                         + "cars = " + curObj.getCount() + ", price = $" + carPrice);
             }
@@ -298,20 +298,20 @@ public class LocalResourceManager implements IResourceManager {
 
     // Delete cars from a location.
     @Override
-    public boolean deleteCars(int id, String location) throws Exception {
-        return deleteItem(id, Car.getKey(location));
+    public boolean deleteCars(int tid, String location) throws Exception {
+        return deleteItem(tid, Car.getKey(location));
     }
 
     // Returns the number of cars available at a location.
     @Override
-    public int queryCars(int id, String location) throws Exception {
-        return queryNum(id, Car.getKey(location));
+    public int queryCars(int tid, String location) throws Exception {
+        return queryNum(tid, Car.getKey(location));
     }
 
     // Returns price of cars at this location.
     @Override
-    public int queryCarsPrice(int id, String location) throws Exception {
-        return queryPrice(id, Car.getKey(location));
+    public int queryCarsPrice(int tid, String location) throws Exception {
+        return queryPrice(tid, Car.getKey(location));
     }
 
 
@@ -321,21 +321,21 @@ public class LocalResourceManager implements IResourceManager {
     // Note: if price <= 0 and the room location already exists, it maintains
     // its current price.
     @Override
-    public boolean addRooms(int id, String location, int numRooms, int roomPrice) throws Exception {
-        Trace.info("RM::addRooms(" + id + ", " + location + ", "
+    public boolean addRooms(int tid, String location, int numRooms, int roomPrice) throws Exception {
+        Trace.info("RM::addRooms(" + tid + ", " + location + ", "
                 + numRooms + ", $" + roomPrice + ")");
-        Room curObj = (Room) readData(id, Room.getKey(location));
+        Room curObj = (Room) readData(tid, Room.getKey(location));
         if (curObj == null) {
             // Doesn't exist; add it.
             Room newObj = new Room(location, numRooms, roomPrice);
-            writeData(id, newObj.getKey(), newObj);
-            Trace.info("RM::addRooms(" + id + ", " + location + ", "
+            writeData(tid, newObj.getKey(), newObj);
+            Trace.info("RM::addRooms(" + tid + ", " + location + ", "
                     + numRooms + ", $" + roomPrice + ") OK.");
         } else {
             synchronized (curObj) {
-                curObj = (Room) readData(id, Room.getKey(location));
+                curObj = (Room) readData(tid, Room.getKey(location));
                 if (curObj == null) {
-                    Trace.info("RM::addRooms(" + id + ", " + location + ", "
+                    Trace.info("RM::addRooms(" + tid + ", " + location + ", "
                             + numRooms + ", $" + roomPrice + "): "
                             + "concurrent modification error.");
                     return false;
@@ -345,8 +345,8 @@ public class LocalResourceManager implements IResourceManager {
                 if (roomPrice > 0) {
                     curObj.setPrice(roomPrice);
                 }
-                writeData(id, curObj.getKey(), curObj);
-                Trace.info("RM::addRooms(" + id + ", " + location + ", "
+                writeData(tid, curObj.getKey(), curObj);
+                Trace.info("RM::addRooms(" + tid + ", " + location + ", "
                         + numRooms + ", $" + roomPrice + ") OK: "
                         + "rooms = " + curObj.getCount() + ", price = $" + roomPrice);
             }
@@ -356,50 +356,50 @@ public class LocalResourceManager implements IResourceManager {
 
     // Delete rooms from a location.
     @Override
-    public boolean deleteRooms(int id, String location) throws Exception {
-        return deleteItem(id, Room.getKey(location));
+    public boolean deleteRooms(int tid, String location) throws Exception {
+        return deleteItem(tid, Room.getKey(location));
     }
 
     // Returns the number of rooms available at a location.
     @Override
-    public int queryRooms(int id, String location) throws Exception {
-        return queryNum(id, Room.getKey(location));
+    public int queryRooms(int tid, String location) throws Exception {
+        return queryNum(tid, Room.getKey(location));
     }
 
     // Returns room price at this location.
     @Override
-    public int queryRoomsPrice(int id, String location) throws Exception {
-        return queryPrice(id, Room.getKey(location));
+    public int queryRoomsPrice(int tid, String location) throws Exception {
+        return queryPrice(tid, Room.getKey(location));
     }
 
 
     // Customer operations //
 
     @Override
-    public int newCustomer(int id) throws Exception {
-        Trace.info("RM::newCustomer(" + id + ")");
+    public int newCustomer(int tid) throws Exception {
+        Trace.info("RM::newCustomer(" + tid + ")");
         // Generate a globally unique Id for the new customer.
-        int customerId = Integer.parseInt(String.valueOf(id) +
+        int customerId = Integer.parseInt(String.valueOf(tid) +
                 String.valueOf(Calendar.getInstance().get(Calendar.MILLISECOND)) +
                 String.valueOf(Math.round(Math.random() * 100 + 1)));
         Customer cust = new Customer(customerId);
-        writeData(id, cust.getKey(), cust);
-        Trace.info("RM::newCustomer(" + id + ") OK: " + customerId);
+        writeData(tid, cust.getKey(), cust);
+        Trace.info("RM::newCustomer(" + tid + ") OK: " + customerId);
         return customerId;
     }
 
     // This method makes testing easier.
     @Override
-    public boolean newCustomerId(int id, int customerId) throws Exception {
-        Trace.info("RM::newCustomer(" + id + ", " + customerId + ")");
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
+    public boolean newCustomerId(int tid, int customerId) throws Exception {
+        Trace.info("RM::newCustomer(" + tid + ", " + customerId + ")");
+        Customer cust = (Customer) readData(tid, Customer.getKey(customerId));
         if (cust == null) {
             cust = new Customer(customerId);
-            writeData(id, cust.getKey(), cust);
-            Trace.info("RM::newCustomer(" + id + ", " + customerId + ") OK.");
+            writeData(tid, cust.getKey(), cust);
+            Trace.info("RM::newCustomer(" + tid + ", " + customerId + ") OK.");
             return true;
         } else {
-            Trace.info("RM::newCustomer(" + id + ", " +
+            Trace.info("RM::newCustomer(" + tid + ", " +
                     customerId + ") failed: customer already exists.");
             return false;
         }
@@ -407,18 +407,18 @@ public class LocalResourceManager implements IResourceManager {
 
     // Delete customer from the database.
     @Override
-    public boolean deleteCustomer(int id, int customerId) throws Exception {
-        Trace.info("RM::deleteCustomer(" + id + ", " + customerId + ")");
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
+    public boolean deleteCustomer(int tid, int customerId) throws Exception {
+        Trace.info("RM::deleteCustomer(" + tid + ", " + customerId + ")");
+        Customer cust = (Customer) readData(tid, Customer.getKey(customerId));
         if (cust == null) {
-            Trace.warn("RM::deleteCustomer(" + id + ", "
+            Trace.warn("RM::deleteCustomer(" + tid + ", "
                     + customerId + ") failed: customer doesn't exist.");
             return false;
         } else {
             synchronized (cust) {
-                cust = (Customer) readData(id, Customer.getKey(customerId));
+                cust = (Customer) readData(tid, Customer.getKey(customerId));
                 if (cust == null) {
-                    Trace.warn("RM::deleteCustomer(" + id + ", "
+                    Trace.warn("RM::deleteCustomer(" + tid + ", "
                             + customerId + ") failed: customer doesn't exist.");
                     return false;
                 }
@@ -428,24 +428,24 @@ public class LocalResourceManager implements IResourceManager {
                 for (Enumeration e = reservationHT.keys(); e.hasMoreElements(); ) {
                     String reservedKey = (String) (e.nextElement());
                     ReservedItem reservedItem = cust.getReservedItem(reservedKey);
-                    Trace.info("RM::deleteCustomer(" + id + ", " + customerId + "): "
+                    Trace.info("RM::deleteCustomer(" + tid + ", " + customerId + "): "
                             + "deleting " + reservedItem.getCount() + " reservations "
                             + "for item " + reservedItem.getKey());
                     ReservableItem item =
-                            (ReservableItem) readData(id, reservedItem.getKey());
+                            (ReservableItem) readData(tid, reservedItem.getKey());
                     synchronized (item) {
                         item.setReserved(
                                 item.getReserved() - reservedItem.getCount());
                         item.setCount(
                                 item.getCount() + reservedItem.getCount());
                     }
-                    Trace.info("RM::deleteCustomer(" + id + ", " + customerId + "): "
+                    Trace.info("RM::deleteCustomer(" + tid + ", " + customerId + "): "
                             + reservedItem.getKey() + " reserved/available = "
                             + item.getReserved() + "/" + item.getCount());
                 }
                 // Remove the customer from the storage.
-                removeData(id, cust.getKey());
-                Trace.info("RM::deleteCustomer(" + id + ", " + customerId + ") OK.");
+                removeData(tid, cust.getKey());
+                Trace.info("RM::deleteCustomer(" + tid + ", " + customerId + ") OK.");
                 return true;
             }
         }
@@ -454,19 +454,19 @@ public class LocalResourceManager implements IResourceManager {
     // Return data structure containing customer reservation info.
     // Returns null if the customer doesn't exist.
     // Returns empty RMHashtable if customer exists but has no reservations.
-    public RMHashtable getCustomerReservations(int id, int customerId) throws Exception {
-        Trace.info("RM::getCustomerReservations(" + id + ", "
+    public RMHashtable getCustomerReservations(int tid, int customerId) throws Exception {
+        Trace.info("RM::getCustomerReservations(" + tid + ", "
                 + customerId + ")");
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
+        Customer cust = (Customer) readData(tid, Customer.getKey(customerId));
         if (cust == null) {
-            Trace.info("RM::getCustomerReservations(" + id + ", "
+            Trace.info("RM::getCustomerReservations(" + tid + ", "
                     + customerId + ") failed: customer doesn't exist.");
             return null;
         } else {
             synchronized (cust) {
-                cust = (Customer) readData(id, Customer.getKey(customerId));
+                cust = (Customer) readData(tid, Customer.getKey(customerId));
                 if (cust == null) {
-                    Trace.info("RM::getCustomerReservations(" + id + ", "
+                    Trace.info("RM::getCustomerReservations(" + tid + ", "
                             + customerId + ") failed: customer doesn't exist.");
                     return null;
                 }
@@ -477,27 +477,27 @@ public class LocalResourceManager implements IResourceManager {
 
     // Return a bill.
     @Override
-    public String queryCustomerInfo(int id, int customerId) throws Exception {
-        Trace.info("RM::queryCustomerInfo(" + id + ", " + customerId + ")");
-        Customer cust = (Customer) readData(id, Customer.getKey(customerId));
+    public String queryCustomerInfo(int tid, int customerId) throws Exception {
+        Trace.info("RM::queryCustomerInfo(" + tid + ", " + customerId + ")");
+        Customer cust = (Customer) readData(tid, Customer.getKey(customerId));
         if (cust == null) {
-            Trace.warn("RM::queryCustomerInfo(" + id + ", "
+            Trace.warn("RM::queryCustomerInfo(" + tid + ", "
                     + customerId + ") failed: customer doesn't exist.");
             // Returning an empty bill means that the customer doesn't exist.
             return "";
         } else {
             String s = "";
             synchronized (cust) {
-                cust = (Customer) readData(id, Customer.getKey(customerId));
+                cust = (Customer) readData(tid, Customer.getKey(customerId));
                 if (cust == null) {
-                    Trace.warn("RM::queryCustomerInfo(" + id + ", "
+                    Trace.warn("RM::queryCustomerInfo(" + tid + ", "
                             + customerId + ") failed: customer doesn't exist.");
                     // Returning an empty bill means that the customer doesn't exist.
                     return "";
                 }
                 s = cust.printBill();
             }
-            Trace.info("RM::queryCustomerInfo(" + id + ", " + customerId + "): \n");
+            Trace.info("RM::queryCustomerInfo(" + tid + ", " + customerId + "): \n");
             System.out.println(s);
             return s;
         }
@@ -505,51 +505,54 @@ public class LocalResourceManager implements IResourceManager {
 
     // Add flight reservation to this customer.
     @Override
-    public boolean reserveFlight(int id, int customerId, int flightNumber) throws Exception {
-        return reserveItem(id, customerId,
+    public boolean reserveFlight(int tid, int customerId, int flightNumber) throws Exception {
+        return reserveItem(tid, customerId,
                 Flight.getKey(flightNumber), String.valueOf(flightNumber));
     }
 
     // Add car reservation to this customer.
     @Override
-    public boolean reserveCar(int id, int customerId, String location) throws Exception {
-        return reserveItem(id, customerId, Car.getKey(location), location);
+    public boolean reserveCar(int tid, int customerId, String location) throws Exception {
+        return reserveItem(tid, customerId, Car.getKey(location), location);
     }
 
     // Add room reservation to this customer.
     @Override
-    public boolean reserveRoom(int id, int customerId, String location) throws Exception {
-        return reserveItem(id, customerId, Room.getKey(location), location);
+    public boolean reserveRoom(int tid, int customerId, String location) throws Exception {
+        return reserveItem(tid, customerId, Room.getKey(location), location);
     }
 
 
     // Reserve an itinerary.
     @Override
-    public boolean reserveItinerary(int id, int customerId, Vector flightNumbers,
+    public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers,
                                     String location, boolean car, boolean room) throws Exception {
         return false;
     }
 
-    /* Not actually used in this implementation, only in MiddleWareResourceManager */
+    /* Should not get called... the middleware decides on transaction IDs */
     @Override
     public int start() throws Exception {
-        return 0;
+        Trace.info("RM::start()");
+        return TM.start();
     }
 
     @Override
     public boolean start(int transactionId) throws Exception {
-        return false;
+        Trace.info(String.format("RM::start(%d)", transactionId));
+        return (TM.start(transactionId) != null);
     }
 
-    /* Not actually used in this implementation, only in MiddleWareResourceManager */
     @Override
     public boolean commit(int transactionId) throws Exception {
-        return false;
+        Trace.info(String.format("RM::commit(%d)", transactionId));
+        return TM.commit(transactionId);
     }
 
-    /* Not actually used in this implementation, only in MiddleWareResourceManager */
+    /* Not actually used in this implementation, only in MiddlewareResourceManager */
     @Override
     public boolean abort(int transactionId) throws Exception {
-        return false;
+        Trace.info(String.format("RM::abort(%d)", transactionId));
+        return TM.abort(transactionId);
     }
 }

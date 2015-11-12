@@ -1,5 +1,6 @@
 package client;
 
+import rmi.SocketSender;
 import server.RMIResourceManager;
 import system.IResourceManager;
 
@@ -14,7 +15,7 @@ public class Client {
 
     public Client(InetAddress host, int port)
     throws Exception {
-        proxy = new RMIResourceManager(host, port);
+        proxy = new RMIResourceManager(new SocketSender(host, port));
     }
 
     public static void main(String[] args) {
@@ -61,11 +62,6 @@ public class Client {
         
             try {
                 //read the next command
-                /*if (transactionId == 0)
-                    System.out.printf("[X] ");
-                else
-                    System.out.printf("[T%d] ",transactionId);*/
-                System.out.printf(">");
                 command = stdin.readLine();
             }
             catch (IOException io) {
@@ -571,8 +567,12 @@ public class Client {
                     break;
                 }
                 System.out.printf("Starting a transaction with id...");
-                int transactionId = proxy.start();
-                System.out.printf("%d.Done.\n", transactionId);
+                try {
+                    int transactionId = proxy.start();
+                    System.out.printf("%d.Done.\n", transactionId);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
                 break;
             }
             case 24: { //commit transaction
@@ -678,11 +678,11 @@ public class Client {
         else if (argument.compareToIgnoreCase("newcustomerid") == 0)
             return 22;
         else if (argument.compareToIgnoreCase("start") == 0)
-            return 22;
+            return 23;
         else if (argument.compareToIgnoreCase("commit") == 0)
-            return 22;
+            return 24;
         else if (argument.compareToIgnoreCase("abort") == 0)
-            return 22;
+            return 25;
         else
             return 666;
     }

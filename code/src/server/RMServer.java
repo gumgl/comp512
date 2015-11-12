@@ -3,6 +3,7 @@ package server;
 
 import system.*;
 import system.IResourceManager;
+import transactions.TransactionManager;
 
 import java.io.IOException;
 
@@ -11,26 +12,24 @@ public class RMServer extends Server {
 
     public static void main(String[] args) throws Exception {
 
-
+        // Get the right port and RM type:
         String stringType = args[0];
         Class classType;
         String stringPort;
 
-
-
         if (stringType.equals("flight")) {
-            classType = Flight.class;
+            classType = system.Flight.class;
             stringPort = args[1];
         } else if (stringType.equals("car")) {
-            classType = Car.class;
+            classType = system.Car.class;
             stringPort = args[2];
         } else /*if (stringType.equals("room"))*/ {
-            classType = Room.class;
+            classType = system.Room.class;
             stringPort = args[3];
         }
         int port = Integer.parseInt(stringPort);
 
-        System.out.printf("%s-type Server starting on port %s\n", stringType, stringPort);
+        Trace.info(String.format("%s-type Server starting on port %s\n", stringType, stringPort));
 
         Server server = new RMServer(port, classType);
         server.run();
