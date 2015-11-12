@@ -37,17 +37,7 @@
                 verbose="true"
                 srcdir="${basedir}/src"
                 destdir="${basedir}/build/server"
-                includes="server/**, client/**">
-        </javac>
-    </target>
-    <target name="build-client" depends="setup">
-        <javac
-                fork="true"
-                debug="true"
-                verbose="true"
-                srcdir="${basedir}/src"
-                destdir="${basedir}/build/client"
-                includes="client/**, server/**">
+                includes="**">
         </javac>
     </target>
     <target name="build-middleware" depends="setup">
@@ -57,7 +47,17 @@
                 verbose="true"
                 srcdir="${basedir}/src"
                 destdir="${basedir}/build/middleware"
-                includes="client/**, server/**">
+                includes="**">
+        </javac>
+    </target>
+    <target name="build-client" depends="setup">
+        <javac
+                fork="true"
+                debug="true"
+                verbose="true"
+                srcdir="${basedir}/src"
+                destdir="${basedir}/build/client"
+                includes="**">
         </javac>
     </target>
 
@@ -74,7 +74,7 @@
         </java>
     </target>
     <target name="middleware" depends="build-middleware">
-        <java classname="middleware.MiddleWareServer">
+        <java classname="middleware.MiddlewareServer">
             <classpath>
                 <pathelement location="${basedir}/build/middleware"/>
             </classpath>
@@ -98,8 +98,12 @@
     </target>
 
     <target name="help">
-        <echo message="server:  Builds and deploys the service"/>
-        <echo message="client:  Builds and runs the client"/>
+        <echo message="First run the RMs with type={flight,car,room}"/>
+        <echo message="    server -Dtype=flight:  Builds and deploys a RMServer"/>
+        <echo message="Then run the middleware:"/>
+        <echo message="    middleware:  Builds and deploys the MiddlewareServer"/>
+        <echo message="Finally run your client:"/>
+        <echo message="    client:  Builds and runs the client"/>
     </target>
     
 </project>
