@@ -3,6 +3,7 @@ package client;
 import rmi.SocketSender;
 import server.RMIResourceManager;
 import system.ResourceManager;
+import transactions.InvalidTransactionIDException;
 
 import java.net.InetAddress;
 import java.util.*;
@@ -72,568 +73,414 @@ public class Client {
             command = command.trim();
             arguments = parse(command);
 
-            //TODO: Refactor the try/catch and better handle IOExceptions
-            //decide which of the commands this was
-            switch(findChoice((String) arguments.elementAt(0))) {
 
-            case 1: //help section
-                if (arguments.size() == 1)   //command was "help"
-                    listCommands();
-                else if (arguments.size() == 2)  //command was "help <commandname>"
-                    listSpecific((String) arguments.elementAt(1));
-                else  //wrong use of help command
-                    System.out.println("Improper use of help command. Type help or help, <commandname>");
-                break;
-                
-            case 2:  //new flight
-                if (arguments.size() != 5) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Adding a new Flight using id: " + arguments.elementAt(1));
-                System.out.println("Flight number: " + arguments.elementAt(2));
-                System.out.println("Add Flight Seats: " + arguments.elementAt(3));
-                System.out.println("Set Flight Price: " + arguments.elementAt(4));
-                
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    flightNumber = getInt(arguments.elementAt(2));
-                    numSeats = getInt(arguments.elementAt(3));
-                    flightPrice = getInt(arguments.elementAt(4));
-                    
-                    if (proxy.addFlight(id, flightNumber, numSeats, flightPrice))
-                        System.out.println("Flight added");
-                    else
-                        System.out.println("Flight could not be added");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 3:  //new car
-                if (arguments.size() != 5) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Adding a new car using id: " + arguments.elementAt(1));
-                System.out.println("car Location: " + arguments.elementAt(2));
-                System.out.println("Add Number of cars: " + arguments.elementAt(3));
-                System.out.println("Set Price: " + arguments.elementAt(4));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
-                    numCars = getInt(arguments.elementAt(3));
-                    price = getInt(arguments.elementAt(4));
+            try {
+                //TODO: Refactor the try/catch and better handle IOExceptions
+                //decide which of the commands this was
+                switch (findChoice((String) arguments.elementAt(0))) {
 
-                    if (proxy.addCars(id, location, numCars, price))
-                        System.out.println("cars added");
-                    else
-                        System.out.println("cars could not be added");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 4:  //new room
-                if (arguments.size() != 5) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Adding a new room using id: " + arguments.elementAt(1));
-                System.out.println("room Location: " + arguments.elementAt(2));
-                System.out.println("Add Number of rooms: " + arguments.elementAt(3));
-                System.out.println("Set Price: " + arguments.elementAt(4));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
-                    numRooms = getInt(arguments.elementAt(3));
-                    price = getInt(arguments.elementAt(4));
+                    case 1: { //help section
+                        if (arguments.size() == 1)   //command was "help"
+                            listCommands();
+                        else if (arguments.size() == 2)  //command was "help <commandname>"
+                            listSpecific((String) arguments.elementAt(1));
+                        else  //wrong use of help command
+                            System.out.println("Improper use of help command. Type help or help, <commandname>");
+                        break;
+                    }
+                    case 2: {  //new flight
+                        if (arguments.size() != 5) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Adding a new Flight using id: " + arguments.elementAt(1));
+                        System.out.println("Flight number: " + arguments.elementAt(2));
+                        System.out.println("Add Flight Seats: " + arguments.elementAt(3));
+                        System.out.println("Set Flight Price: " + arguments.elementAt(4));
 
-                    if (proxy.addRooms(id, location, numRooms, price))
-                        System.out.println("rooms added");
-                    else
-                        System.out.println("rooms could not be added");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 5:  //new Customer
-                if (arguments.size() != 2) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = proxy.newCustomer(id);
-                    System.out.println("new customer id: " + customer);
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 6: //delete Flight
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Deleting a flight using id: " + arguments.elementAt(1));
-                System.out.println("Flight Number: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    flightNumber = getInt(arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        flightNumber = getInt(arguments.elementAt(2));
+                        numSeats = getInt(arguments.elementAt(3));
+                        flightPrice = getInt(arguments.elementAt(4));
 
-                    if (proxy.deleteFlight(id, flightNumber))
-                        System.out.println("Flight Deleted");
-                    else
-                        System.out.println("Flight could not be deleted");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 7: //delete car
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Deleting the cars from a particular location  using id: " + arguments.elementAt(1));
-                System.out.println("car Location: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
+                        if (proxy.addFlight(id, flightNumber, numSeats, flightPrice))
+                            System.out.println("Flight added");
+                        else
+                            System.out.println("Flight could not be added");
+                        break;
+                    }
+                    case 3: {  //new car
+                        if (arguments.size() != 5) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Adding a new car using id: " + arguments.elementAt(1));
+                        System.out.println("car Location: " + arguments.elementAt(2));
+                        System.out.println("Add Number of cars: " + arguments.elementAt(3));
+                        System.out.println("Set Price: " + arguments.elementAt(4));
+                        id = getInt(arguments.elementAt(1));
+                        location = getString(arguments.elementAt(2));
+                        numCars = getInt(arguments.elementAt(3));
+                        price = getInt(arguments.elementAt(4));
 
-                    if (proxy.deleteCars(id, location))
-                        System.out.println("cars Deleted");
-                    else
-                        System.out.println("cars could not be deleted");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 8: //delete room
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Deleting all rooms from a particular location  using id: " + arguments.elementAt(1));
-                System.out.println("room Location: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
+                        if (proxy.addCars(id, location, numCars, price))
+                            System.out.println("cars added");
+                        else
+                            System.out.println("cars could not be added");
+                        break;
+                    }
+                    case 4: {  //new room
+                        if (arguments.size() != 5) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Adding a new room using id: " + arguments.elementAt(1));
+                        System.out.println("room Location: " + arguments.elementAt(2));
+                        System.out.println("Add Number of rooms: " + arguments.elementAt(3));
+                        System.out.println("Set Price: " + arguments.elementAt(4));
+                        id = getInt(arguments.elementAt(1));
+                        location = getString(arguments.elementAt(2));
+                        numRooms = getInt(arguments.elementAt(3));
+                        price = getInt(arguments.elementAt(4));
 
-                    if (proxy.deleteRooms(id, location))
-                        System.out.println("rooms Deleted");
-                    else
-                        System.out.println("rooms could not be deleted");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 9: //delete Customer
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Deleting a customer from the database using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
+                        if (proxy.addRooms(id, location, numRooms, price))
+                            System.out.println("rooms added");
+                        else
+                            System.out.println("rooms could not be added");
+                        break;
+                    }
+                    case 5: {  //new Customer
+                        if (arguments.size() != 2) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Adding a new Customer using id: " + arguments.elementAt(1));
+                        id = getInt(arguments.elementAt(1));
+                        int customer = proxy.newCustomer(id);
+                        System.out.println("new customer id: " + customer);
+                        break;
+                    }
+                    case 6: { //delete Flight
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Deleting a flight using id: " + arguments.elementAt(1));
+                        System.out.println("Flight Number: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        flightNumber = getInt(arguments.elementAt(2));
 
-                    if (proxy.deleteCustomer(id, customer))
-                        System.out.println("Customer Deleted");
-                    else
-                        System.out.println("Customer could not be deleted");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 10: //querying a flight
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Querying a flight using id: " + arguments.elementAt(1));
-                System.out.println("Flight number: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    flightNumber = getInt(arguments.elementAt(2));
-                    int seats = proxy.queryFlight(id, flightNumber);
-                    System.out.println("Number of seats available: " + seats);
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 11: //querying a car Location
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Querying a car location using id: " + arguments.elementAt(1));
-                System.out.println("car location: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
+                        if (proxy.deleteFlight(id, flightNumber))
+                            System.out.println("Flight Deleted");
+                        else
+                            System.out.println("Flight could not be deleted");
+                        break;
+                    }
+                    case 7: { //delete car
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Deleting the cars from a particular location  using id: " + arguments.elementAt(1));
+                        System.out.println("car Location: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        location = getString(arguments.elementAt(2));
 
-                    numCars = proxy.queryCars(id, location);
-                    System.out.println("number of cars at this location: " + numCars);
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 12: //querying a room location
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Querying a room location using id: " + arguments.elementAt(1));
-                System.out.println("room location: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
+                        if (proxy.deleteCars(id, location))
+                            System.out.println("cars Deleted");
+                        else
+                            System.out.println("cars could not be deleted");
+                        break;
+                    }
+                    case 8: { //delete room
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Deleting all rooms from a particular location  using id: " + arguments.elementAt(1));
+                        System.out.println("room Location: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        location = getString(arguments.elementAt(2));
 
-                    numRooms = proxy.queryRooms(id, location);
-                    System.out.println("number of rooms at this location: " + numRooms);
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 13: //querying Customer Information
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Querying Customer information using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
+                        if (proxy.deleteRooms(id, location))
+                            System.out.println("rooms Deleted");
+                        else
+                            System.out.println("rooms could not be deleted");
+                        break;
+                    }
+                    case 9: { //delete Customer
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Deleting a customer from the database using id: " + arguments.elementAt(1));
+                        System.out.println("Customer id: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        int customer = getInt(arguments.elementAt(2));
 
-                    String bill = proxy.queryCustomerInfo(id, customer);
-                    System.out.println("Customer info: " + bill);
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;               
-                
-            case 14: //querying a flight Price
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Querying a flight Price using id: " + arguments.elementAt(1));
-                System.out.println("Flight number: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    flightNumber = getInt(arguments.elementAt(2));
+                        if (proxy.deleteCustomer(id, customer))
+                            System.out.println("Customer Deleted");
+                        else
+                            System.out.println("Customer could not be deleted");
+                        break;
+                    }
+                    case 10: { //querying a flight
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Querying a flight using id: " + arguments.elementAt(1));
+                        System.out.println("Flight number: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        flightNumber = getInt(arguments.elementAt(2));
+                        int seats = proxy.queryFlight(id, flightNumber);
+                        System.out.println("Number of seats available: " + seats);
+                        break;
+                    }
+                    case 11: { //querying a car Location
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Querying a car location using id: " + arguments.elementAt(1));
+                        System.out.println("car location: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        location = getString(arguments.elementAt(2));
 
-                    price = proxy.queryFlightPrice(id, flightNumber);
-                    System.out.println("Price of a seat: " + price);
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 15: //querying a car Price
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Querying a car price using id: " + arguments.elementAt(1));
-                System.out.println("car location: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
+                        numCars = proxy.queryCars(id, location);
+                        System.out.println("number of cars at this location: " + numCars);
+                        break;
+                    }
+                    case 12: { //querying a room location
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Querying a room location using id: " + arguments.elementAt(1));
+                        System.out.println("room location: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        location = getString(arguments.elementAt(2));
 
-                    price = proxy.queryCarsPrice(id, location);
-                    System.out.println("Price of a car at this location: " + price);
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }                
-                break;
+                        numRooms = proxy.queryRooms(id, location);
+                        System.out.println("number of rooms at this location: " + numRooms);
+                        break;
+                    }
+                    case 13: { //querying Customer Information
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Querying Customer information using id: " + arguments.elementAt(1));
+                        System.out.println("Customer id: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        int customer = getInt(arguments.elementAt(2));
 
-            case 16: //querying a room price
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Querying a room price using id: " + arguments.elementAt(1));
-                System.out.println("room Location: " + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    location = getString(arguments.elementAt(2));
+                        String bill = proxy.queryCustomerInfo(id, customer);
+                        System.out.println("Customer info: " + bill);
+                        break;
+                    }
+                    case 14: { //querying a flight Price
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Querying a flight Price using id: " + arguments.elementAt(1));
+                        System.out.println("Flight number: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        flightNumber = getInt(arguments.elementAt(2));
 
-                    price = proxy.queryRoomsPrice(id, location);
-                    System.out.println("Price of rooms at this location: " + price);
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 17:  //reserve a flight
-                if (arguments.size() != 4) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Reserving a seat on a flight using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-                System.out.println("Flight number: " + arguments.elementAt(3));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
-                    flightNumber = getInt(arguments.elementAt(3));
+                        price = proxy.queryFlightPrice(id, flightNumber);
+                        System.out.println("Price of a seat: " + price);
+                        break;
+                    }
+                    case 15: { //querying a car Price
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Querying a car price using id: " + arguments.elementAt(1));
+                        System.out.println("car location: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        location = getString(arguments.elementAt(2));
 
-                    if (proxy.reserveFlight(id, customer, flightNumber))
-                        System.out.println("Flight Reserved");
-                    else
-                        System.out.println("Flight could not be reserved.");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 18:  //reserve a car
-                if (arguments.size() != 4) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Reserving a car at a location using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-                System.out.println("Location: " + arguments.elementAt(3));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
-                    location = getString(arguments.elementAt(3));
-                    
-                    if (proxy.reserveCar(id, customer, location))
-                        System.out.println("car Reserved");
-                    else
-                        System.out.println("car could not be reserved.");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 19:  //reserve a room
-                if (arguments.size() != 4) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Reserving a room at a location using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-                System.out.println("Location: " + arguments.elementAt(3));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
-                    location = getString(arguments.elementAt(3));
-                    
-                    if (proxy.reserveRoom(id, customer, location))
-                        System.out.println("room Reserved");
-                    else
-                        System.out.println("room could not be reserved.");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                
-            case 20:  //reserve an Itinerary
-                if (arguments.size()<7) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
-                System.out.println("Customer id: " + arguments.elementAt(2));
-                for (int i = 0; i<arguments.size()-6; i++)
-                    System.out.println("Flight number" + arguments.elementAt(3 + i));
-                System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size()-3));
-                System.out.println("car to book?: " + arguments.elementAt(arguments.size()-2));
-                System.out.println("room to book?: " + arguments.elementAt(arguments.size()-1));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
-                    Vector flightNumbers = new Vector();
-                    for (int i = 0; i < arguments.size()-6; i++)
-                        flightNumbers.addElement(arguments.elementAt(3 + i));
-                    location = getString(arguments.elementAt(arguments.size()-3));
-                    car = getBoolean(arguments.elementAt(arguments.size()-2));
-                    room = getBoolean(arguments.elementAt(arguments.size()-1));
-                    
-                    if (proxy.reserveItinerary(id, customer, flightNumbers, 
-                            location, car, room))
-                        System.out.println("Itinerary Reserved");
-                    else
-                        System.out.println("Itinerary could not be reserved.");
-                }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-                            
-            case 21:  //quit the client
-                if (arguments.size() != 1) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Quitting client.");
-                return;
-                
-            case 22:  //new Customer given id
-                if (arguments.size() != 3) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.println("Adding a new Customer using id: "
-                        + arguments.elementAt(1)  +  " and cid "  + arguments.elementAt(2));
-                try {
-                    id = getInt(arguments.elementAt(1));
-                    int customer = getInt(arguments.elementAt(2));
+                        price = proxy.queryCarsPrice(id, location);
+                        System.out.println("Price of a car at this location: " + price);
+                        break;
+                    }
+                    case 16: { //querying a room price
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Querying a room price using id: " + arguments.elementAt(1));
+                        System.out.println("room Location: " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        location = getString(arguments.elementAt(2));
 
-                    boolean c = proxy.newCustomerId(id, customer);
-                    System.out.println("new customer id: " + customer);
+                        price = proxy.queryRoomsPrice(id, location);
+                        System.out.println("Price of rooms at this location: " + price);
+                        break;
+                    }
+                    case 17: {  //reserve a flight
+                        if (arguments.size() != 4) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Reserving a seat on a flight using id: " + arguments.elementAt(1));
+                        System.out.println("Customer id: " + arguments.elementAt(2));
+                        System.out.println("Flight number: " + arguments.elementAt(3));
+                        id = getInt(arguments.elementAt(1));
+                        int customer = getInt(arguments.elementAt(2));
+                        flightNumber = getInt(arguments.elementAt(3));
+
+                        if (proxy.reserveFlight(id, customer, flightNumber))
+                            System.out.println("Flight Reserved");
+                        else
+                            System.out.println("Flight could not be reserved.");
+                        break;
+                    }
+                    case 18: {  //reserve a car
+                        if (arguments.size() != 4) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Reserving a car at a location using id: " + arguments.elementAt(1));
+                        System.out.println("Customer id: " + arguments.elementAt(2));
+                        System.out.println("Location: " + arguments.elementAt(3));
+                        id = getInt(arguments.elementAt(1));
+                        int customer = getInt(arguments.elementAt(2));
+                        location = getString(arguments.elementAt(3));
+
+                        if (proxy.reserveCar(id, customer, location))
+                            System.out.println("car Reserved");
+                        else
+                            System.out.println("car could not be reserved.");
+                        break;
+                    }
+                    case 19: {  //reserve a room
+                        if (arguments.size() != 4) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Reserving a room at a location using id: " + arguments.elementAt(1));
+                        System.out.println("Customer id: " + arguments.elementAt(2));
+                        System.out.println("Location: " + arguments.elementAt(3));
+                        id = getInt(arguments.elementAt(1));
+                        int customer = getInt(arguments.elementAt(2));
+                        location = getString(arguments.elementAt(3));
+
+                        if (proxy.reserveRoom(id, customer, location))
+                            System.out.println("room Reserved");
+                        else
+                            System.out.println("room could not be reserved.");
+                        break;
+                    }
+                    case 20: { //reserve an Itinerary
+                        if (arguments.size() < 7) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Reserving an Itinerary using id: " + arguments.elementAt(1));
+                        System.out.println("Customer id: " + arguments.elementAt(2));
+                        for (int i = 0; i < arguments.size() - 6; i++)
+                            System.out.println("Flight number" + arguments.elementAt(3 + i));
+                        System.out.println("Location for car/room booking: " + arguments.elementAt(arguments.size() - 3));
+                        System.out.println("car to book?: " + arguments.elementAt(arguments.size() - 2));
+                        System.out.println("room to book?: " + arguments.elementAt(arguments.size() - 1));
+                        id = getInt(arguments.elementAt(1));
+                        int customer = getInt(arguments.elementAt(2));
+                        Vector flightNumbers = new Vector();
+                        for (int i = 0; i < arguments.size() - 6; i++)
+                            flightNumbers.addElement(arguments.elementAt(3 + i));
+                        location = getString(arguments.elementAt(arguments.size() - 3));
+                        car = getBoolean(arguments.elementAt(arguments.size() - 2));
+                        room = getBoolean(arguments.elementAt(arguments.size() - 1));
+
+                        if (proxy.reserveItinerary(id, customer, flightNumbers,
+                                location, car, room))
+                            System.out.println("Itinerary Reserved");
+                        else
+                            System.out.println("Itinerary could not be reserved.");
+                        break;
+                    }
+                    case 21: //quit the client
+                        if (arguments.size() != 1) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Quitting client.");
+                        return;
+
+                    case 22: { //new Customer given id
+                        if (arguments.size() != 3) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.println("Adding a new Customer using id: "
+                                + arguments.elementAt(1) + " and cid " + arguments.elementAt(2));
+                        id = getInt(arguments.elementAt(1));
+                        int customer = getInt(arguments.elementAt(2));
+
+                        boolean c = proxy.newCustomerId(id, customer);
+                        System.out.println("new customer id: " + customer);
+                        break;
+                    }
+                    case 23: { //start transaction
+                        if (arguments.size() != 1) {
+                            wrongNumber();
+                            break;
+                        }
+                        System.out.printf("Starting a transaction with id...");
+                        int transactionId = proxy.start();
+                        System.out.printf("%d.Done.\n", transactionId);
+                        break;
+                    }
+                    case 24: { //commit transaction
+                        if (arguments.size() != 2) {
+                            wrongNumber();
+                            break;
+                        }
+                        int transactionId = getInt(arguments.elementAt(1));
+                        boolean success = proxy.commit(transactionId);
+                        if (success)
+                            System.out.printf("Transaction %d committed.\n", transactionId);
+                        else
+                            System.out.printf("Commit failed for transaction %d.\n", transactionId);
+                        break;
+                    }
+                    case 25: { //abort transaction
+                        if (arguments.size() != 2) {
+                            wrongNumber();
+                            break;
+                        }
+                        int transactionId = getInt(arguments.elementAt(1));
+                        boolean success = proxy.commit(transactionId);
+                        if (success)
+                            System.out.printf("Transaction %d aborted.\n", transactionId);
+                        else
+                            System.out.printf("Abort failed for transaction %d.\n", transactionId);
+                        break;
+                    }
+                    case 26: { //shutdown
+                        if (arguments.size() != 1) {
+                            wrongNumber();
+                            break;
+                        }
+                        boolean success = proxy.shutdown();
+                        if (success)
+                            System.out.println("Servers shut down!");
+                        else
+                            System.out.println("Servers did not shut down.");
+                        break;
+                    }
+                    default:
+                        System.out.println("The interface does not support this command.");
+                        break;
                 }
-                catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-            case 23: { //start transaction
-                if (arguments.size() != 1) {
-                    wrongNumber();
-                    break;
-                }
-                System.out.printf("Starting a transaction with id...");
-                try {
-                    int transactionId = proxy.start();
-                    System.out.printf("%d.Done.\n", transactionId);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-                break;
-            }
-            case 24: { //commit transaction
-                if (arguments.size() != 2) {
-                    wrongNumber();
-                    break;
-                }
-                try {
-                    int transactionId = getInt(arguments.elementAt(1));
-                    boolean success = proxy.commit(transactionId);
-                    if (success)
-                        System.out.printf("Transaction %d committed.\n", transactionId);
-                    else
-                        System.out.printf("Commit failed for transaction %d.\n", transactionId);
-                } catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-            }
-            case 25: { //abort transaction
-                if (arguments.size() != 2) {
-                    wrongNumber();
-                    break;
-                }
-                try {
-                    int transactionId = getInt(arguments.elementAt(1));
-                    boolean success = proxy.abort(transactionId);
-                    if (success)
-                        System.out.printf("Transaction %d aborted.\n", transactionId);
-                    else
-                        System.out.printf("Abort failed for transaction %d.\n", transactionId);
-                } catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-            }
-            case 26: { //shutdown
-                if (arguments.size() != 1) {
-                    wrongNumber();
-                    break;
-                }
-                try {
-                    boolean success = proxy.shutdown();
-                    if (success)
-                        System.out.println("Servers shut down.");
-                    else
-                        System.out.println("Servers not shut down.");
-                } catch(Exception e) {
-                    System.out.println("EXCEPTION: ");
-                    System.out.println(e.getMessage());
-                    e.printStackTrace();
-                }
-                break;
-            }
-            default:
-                System.out.println("The interface does not support this command.");
-                break;
+            } catch (InvalidTransactionIDException e) {
+                System.out.println(e.getClass().getName() + ": " + e.getMessage());
+            } catch (Exception e) {
+                System.out.println("Uncaught " + e.getClass().getName() + ": " + e.getMessage());
             }
         }
     }
