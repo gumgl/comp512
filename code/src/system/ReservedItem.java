@@ -17,7 +17,12 @@ public class ReservedItem extends RMItem {
 	private String m_strReservableItemKey;
 	private String m_strLocation;
 
-	public ReservedItem() {}
+	public ReservedItem() {
+		m_nCount = 0;
+		m_nPrice = 0;
+		m_strReservableItemKey = "";
+		m_strLocation = "";
+	}
 	ReservedItem(String key, String location, int count, int price) {
 		super();
 		m_strReservableItemKey = key;

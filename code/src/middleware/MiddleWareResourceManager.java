@@ -217,6 +217,7 @@ public class MiddlewareResourceManager extends ResourceManager {
     public int start() {
         Trace.info("MW::start()");
         int id = TM.start(); // First locally start with latest TC
+        customerRM.start(id);
         flightRM.start(id); // Then forward start with same TC
         carRM.start(id);
         roomRM.start(id);

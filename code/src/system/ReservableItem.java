@@ -17,7 +17,12 @@ public abstract class ReservableItem extends RMItem implements Serializable {
     protected int m_nReserved;
     protected String m_strLocation;
 
-    public ReservableItem() {}
+    public ReservableItem() {
+        m_nCount = 0;
+        m_nPrice = 0;
+        m_nReserved = 0;
+        m_strLocation = "";
+    }
     
     public ReservableItem(String location, int count, int price) {
         super();
@@ -28,10 +33,10 @@ public abstract class ReservableItem extends RMItem implements Serializable {
     }
 
     protected void copyInternals(ReservableItem item) {
-        this.m_strLocation = item.m_strLocation;
         this.m_nCount = item.m_nCount;
         this.m_nPrice = item.m_nPrice;
         this.m_nReserved = item.m_nReserved;
+        this.m_strLocation = item.m_strLocation + "";
     }
 
     public void setCount(int count) { 
