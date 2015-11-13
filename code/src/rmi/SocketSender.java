@@ -14,26 +14,33 @@ import java.net.Socket;
  */
 
 public class SocketSender implements Invokable {
-
+	InetAddress host;
+	int port;
 	Socket socket;
 	ObjectOutputStream outStream;
 	ObjectInputStream inStream;
 
 	public SocketSender(InetAddress host, int port) {
+		this.host = host;
+		this.port = port;
+
+		this.socket = setupSocket();
+	}
+
+	private Socket setupSocket() {
 		Trace.info(String.format("Connecting to server %s:%d... ",host.toString(),port));
 		while(true) {
 			try {
-				socket = new Socket(host, port);
+				Socket newSocket = new Socket(this.host, this.port);
 				Trace.info("Connected!");
-				outStream = new ObjectOutputStream(socket.getOutputStream());
+				outStream = new ObjectOutputStream(newSocket.getOutputStream());
 				//System.out.println("[SocketSender]OutputStream created");
 				outStream.flush();
 				//System.out.println("[SocketSender]OutputStream flushed");
-				inStream = new ObjectInputStream(socket.getInputStream());
-
-				break; // Successful connection, break out of loop
-			} catch(IOException e){
-				Trace.error("Failed, trying again...");
+				inStream = new ObjectInputStream(newSocket.getInputStream());
+				return newSocket; // Successful connection, break out of loop
+			} catch (IOException e) { // Retry until success...
+				//Trace.error("Failed, trying again...");
 			}
 		}
 	}
@@ -41,24 +48,27 @@ public class SocketSender implements Invokable {
 	@Override
 	public Object invoke(Invocation invocation) throws RuntimeException {
 		Trace.info("Invoking target." + invocation.toString());
-		try {
-			outStream.writeObject(invocation);
-			Trace.info("Sent! Waiting for response...");
-			Response response = (Response) inStream.readObject();
-			Trace.info("Response received: " + response.toString());
 
-			if (response.getException() != null)
-				throw response.getException();
-			else
-				return response.getReturnValue();
-		} catch (IOException e) {
-			Trace.error("Could not read/write from/to socket");
-			e.printStackTrace();
-			throw new UncheckedIOException(e);
-		} catch (ClassNotFoundException e) {
-			Trace.error("Problem instantiating response");
-			e.printStackTrace();
-			throw new ClassCastException();
+		while (true) { // As many attempts as it takes to perform the Invocation
+			try {
+				outStream.writeObject(invocation);
+				Trace.info("Sent! Waiting for response...");
+				Response response = (Response) inStream.readObject();
+				Trace.info("Response received: " + response.toString());
+
+				if (response.getException() != null)
+					throw response.getException();
+				else
+					return response.getReturnValue();
+			} catch (IOException e) {
+				Trace.error("Error with socket, reconnecting", e);
+				socket = setupSocket();
+				//throw new UncheckedIOException(e);
+			} catch (ClassNotFoundException e) {
+				Trace.error("Problem instantiating response");
+				e.printStackTrace();
+				throw new ClassCastException();
+			}
 		}
 	}
 }

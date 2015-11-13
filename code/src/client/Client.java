@@ -1,7 +1,9 @@
 package client;
 
+import locks.DeadlockException;
 import rmi.SocketSender;
 import server.RMIResourceManager;
+import server.Trace;
 import system.ResourceManager;
 import transactions.InvalidTransactionIDException;
 
@@ -474,10 +476,10 @@ public class Client {
                         System.out.println("The interface does not support this command.");
                         break;
                 }
-            } catch (InvalidTransactionIDException e) {
-                System.out.println(e.getClass().getName() + ": " + e.getMessage());
+            } catch (InvalidTransactionIDException|DeadlockException e) {
+                Trace.error(e);
             } catch (RuntimeException e) {
-                System.out.println("Uncaught " + e.getClass().getName() + ": " + e.getMessage());
+                Trace.error("Uncaught", e);
                 e.printStackTrace(System.out);
             }
         }

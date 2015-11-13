@@ -35,7 +35,7 @@ public class MiddlewareResourceManager extends ResourceManager {
     private ResourceManager handleOperation(int tid, ResourceManager relevantRM) throws InvalidTransactionIDException {
         if (!TM.isTransactionIdValid(tid)) {
             InvalidTransactionIDException e = new InvalidTransactionIDException(tid);
-            Trace.error(e.getMessage());
+            Trace.error(e);
             throw e;
         } else {
             TM.enlist(tid, relevantRM);

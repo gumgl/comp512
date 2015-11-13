@@ -12,9 +12,9 @@ import java.io.*;
 import java.rmi.RemoteException;
 
 /*
- * This class will pass the RMIs received from a socket connection to the localResource object;
+ * This class will pass the RMIs received from a newSocket connection to the localResource object;
  */
-public class Receiver implements Runnable {
+public class Receiver extends Thread {
 	Socket clientSocket;
 	ObjectInputStream inStream;
 	ObjectOutputStream outputStream;
@@ -33,18 +33,18 @@ public class Receiver implements Runnable {
 			outputStream.flush();
 
 			inStream = new ObjectInputStream(clientSocket.getInputStream());
-			Trace.info("InputStream created");
+			//Trace.info("InputStream created");
 
 			while(localResource.active) { // Read requests forever...
-				Trace.info("Waiting for an Invocation...");
+				//Trace.info("Ready for an Invocation...");
 				Invocation invocation = (Invocation) inStream.readObject();
 				Response response = handleRMI(invocation);
-				Trace.info("Sending back response...");
+				Trace.info("Sending back Response(" + response.toString() + ")...");
 				outputStream.writeObject(response);
 			}
-			Trace.info("This receiver stops receiving.");
+			Trace.info("Receiver stopped.");
 		} catch(SocketException e) {
-			Trace.info("Client disconnected (" + e + ")");
+			throw new UncheckedIOException(e); // Only works when Receiver is not in thread pool
 		} catch (Exception e) {
 			Trace.error("Socket stream failed!");
 			e.printStackTrace();
