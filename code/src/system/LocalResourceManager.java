@@ -5,7 +5,6 @@
 
 package system;
 
-import locks.DeadlockException;
 import server.Trace;
 import transactions.TransactionManager;
 
@@ -511,13 +510,13 @@ public class LocalResourceManager extends ResourceManager {
 
     // Add car reservation to this customer.
     @Override
-    public boolean reserveCar(int tid, int customerId, String location) {
+    public boolean reserveCar(int tid, int customerId, String location, int numCars) {
         return reserveItem(tid, customerId, Car.getKey(location), location);
     }
 
     // Add room reservation to this customer.
     @Override
-    public boolean reserveRoom(int tid, int customerId, String location) {
+    public boolean reserveRoom(int tid, int customerId, String location, int numRooms) {
         return reserveItem(tid, customerId, Room.getKey(location), location);
     }
 
@@ -525,7 +524,7 @@ public class LocalResourceManager extends ResourceManager {
     // Reserve an itinerary.
     @Override
     public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers,
-                                    String location, boolean car, boolean room) {
+                                    String location, int numCars, int numRooms) {
         return false;
     }
 
@@ -557,6 +556,7 @@ public class LocalResourceManager extends ResourceManager {
 
     @Override
     public boolean shutdown() {
+        Trace.info("RM::shutdown");
         active = false;
         return true;
     }

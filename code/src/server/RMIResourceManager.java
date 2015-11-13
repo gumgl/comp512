@@ -176,34 +176,36 @@ public class RMIResourceManager extends ResourceManager {
 	}
 
 	@Override
-	public boolean reserveCar(int tid, int customerId, String location) {
+	public boolean reserveCar(int tid, int customerId, String location, int numCars) {
 		Invocation invocation = new Invocation("reserveCar");
 		invocation.addParam(tid);
 		invocation.addParam(customerId);
 		invocation.addParam(location);
+		invocation.addParam(numCars);
 		return (Boolean) target.invoke(invocation);
 	}
 
 	@Override
-	public boolean reserveRoom(int tid, int customerId, String location) {
+	public boolean reserveRoom(int tid, int customerId, String location, int numRooms) {
 		Invocation invocation = new Invocation("reserveRoom");
 		invocation.addParam(tid);
 		invocation.addParam(customerId);
 		invocation.addParam(location);
+		invocation.addParam(numRooms);
 		return (Boolean) target.invoke(invocation);
 	}
 
 
 	@Override
 	public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers,
-									String location, boolean car, boolean room) {
+	                                String location, int numCars, int numRooms) {
 		Invocation invocation = new Invocation("reserveItinerary");
 		invocation.addParam(tid);
 		invocation.addParam(customerId);
 		invocation.addParam(flightNumbers);
 		invocation.addParam(location);
-		invocation.addParam(car);
-		invocation.addParam(room);
+		invocation.addParam(numCars);
+		invocation.addParam(numRooms);
 		return (Boolean) target.invoke(invocation);
 	}
 

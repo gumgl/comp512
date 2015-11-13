@@ -111,15 +111,15 @@ public abstract class ResourceManager {
 	abstract public boolean reserveFlight(int tid, int customerId, int flightNumber);
 
 	/* Reserve a car at this location. */
-	abstract public boolean reserveCar(int tid, int customerId, String location);
+	abstract public boolean reserveCar(int tid, int customerId, String location, int numCars);
 
 	/* Reserve a room at this location. */
-	abstract public boolean reserveRoom(int tid, int customerId, String location);
+	abstract public boolean reserveRoom(int tid, int customerId, String location, int numRooms);
 
 
 	/* Reserve an itinerary. */
 	abstract public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers,
-									String location, boolean car, boolean room);
+	                                         String location, int numCars, int numRooms);
 
 	/* Start a new transaction and return its id */
 	abstract public int start();

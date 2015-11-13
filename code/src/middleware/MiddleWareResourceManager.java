@@ -163,17 +163,17 @@ public class MiddlewareResourceManager extends ResourceManager {
     }
 
     @Override
-    public boolean reserveCar(int tid, int customerId, String location) {
-        return handleOperation(tid, carRM).reserveCar(tid, customerId, location);
+    public boolean reserveCar(int tid, int customerId, String location, int numCars) {
+        return handleOperation(tid, carRM).reserveCar(tid, customerId, location, numCars);
     }
 
     @Override
-    public boolean reserveRoom(int tid, int customerId, String location) {
-        return handleOperation(tid, roomRM).reserveRoom(tid, customerId, location);
+    public boolean reserveRoom(int tid, int customerId, String location, int numRooms) {
+        return handleOperation(tid, roomRM).reserveRoom(tid, customerId, location, numRooms);
     }
 
     @Override
-    public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers, String location, boolean car, boolean room) {
+    public boolean reserveItinerary(int tid, int customerId, Vector flightNumbers, String location, int numCars, int numRooms) {
         Trace.info("MW::reserveItinerary(" + tid + ", " + customerId + ", ...)");
         handleOperation(tid, customerRM);
         if (customerRM.getCustomerReservations(tid, customerId) == null) { // Customer does not exist
@@ -192,18 +192,18 @@ public class MiddlewareResourceManager extends ResourceManager {
             e.printStackTrace();
             return false;
         }
-        if (car) {
+        if (numCars > 0) {
             try {
-                r &= reserveCar(tid, customerId, location);
+                r &= reserveCar(tid, customerId, location, numCars);
                 Trace.info("MW: Reserve car " + (r ? "OK" : "Failed"));
             } catch (Exception e) {
                 e.printStackTrace();
                 return false;
             }
         }
-        if (room) {
+        if (numRooms > 0) {
             try {
-                r &= reserveRoom(tid, customerId, location);
+                r &= reserveRoom(tid, customerId, location, numRooms);
                 Trace.info("MW: Reserve room " + (r ? "OK" : "Failed"));
             } catch (Exception e) {
                 e.printStackTrace();

@@ -45,8 +45,8 @@ public class Client {
         int flightNumber;
         int flightPrice;
         int numSeats;
-        boolean room;
-        boolean car;
+        int room;
+        int car;
         int price;
         int numRooms;
         int numCars;
@@ -339,36 +339,40 @@ public class Client {
                         break;
                     }
                     case 18: {  //reserve a car
-                        if (arguments.size() != 4) {
+                        if (arguments.size() != 5) {
                             wrongNumber();
                             break;
                         }
-                        System.out.println("Reserving a car at a location using id: " + arguments.elementAt(1));
+                        System.out.println("Reserving " + arguments.elementAt(4) + " car(s) at a location using id: " + arguments.elementAt(1));
                         System.out.println("Customer id: " + arguments.elementAt(2));
-                        System.out.println("Location: " + arguments.elementAt(3));
+	                    System.out.println("Location: " + arguments.elementAt(3));
+	                    System.out.println("Number of cars: " + arguments.elementAt(4));
                         id = getInt(arguments.elementAt(1));
                         int customer = getInt(arguments.elementAt(2));
                         location = getString(arguments.elementAt(3));
+	                    numCars = getInt(arguments.elementAt(4));
 
-                        if (proxy.reserveCar(id, customer, location))
+                        if (proxy.reserveCar(id, customer, location, numCars))
                             System.out.println("car Reserved");
                         else
                             System.out.println("car could not be reserved.");
                         break;
                     }
                     case 19: {  //reserve a room
-                        if (arguments.size() != 4) {
+                        if (arguments.size() != 5) {
                             wrongNumber();
                             break;
                         }
-                        System.out.println("Reserving a room at a location using id: " + arguments.elementAt(1));
+                        System.out.println("Reserving " + arguments.elementAt(4) + "  room(s) at a location using id: " + arguments.elementAt(1));
                         System.out.println("Customer id: " + arguments.elementAt(2));
-                        System.out.println("Location: " + arguments.elementAt(3));
+	                    System.out.println("Location: " + arguments.elementAt(3));
+	                    System.out.println("Number of rooms: " + arguments.elementAt(4));
                         id = getInt(arguments.elementAt(1));
                         int customer = getInt(arguments.elementAt(2));
                         location = getString(arguments.elementAt(3));
+	                    numRooms = getInt(arguments.elementAt(4));
 
-                        if (proxy.reserveRoom(id, customer, location))
+                        if (proxy.reserveRoom(id, customer, location, numRooms))
                             System.out.println("room Reserved");
                         else
                             System.out.println("room could not be reserved.");
@@ -392,11 +396,11 @@ public class Client {
                         for (int i = 0; i < arguments.size() - 6; i++)
                             flightNumbers.addElement(arguments.elementAt(3 + i));
                         location = getString(arguments.elementAt(arguments.size() - 3));
-                        car = getBoolean(arguments.elementAt(arguments.size() - 2));
-                        room = getBoolean(arguments.elementAt(arguments.size() - 1));
+                        numCars = getInt(arguments.elementAt(arguments.size() - 2));
+                        numRooms = getInt(arguments.elementAt(arguments.size() - 1));
 
                         if (proxy.reserveItinerary(id, customer, flightNumbers,
-                                location, car, room))
+                                location, numCars, numRooms))
                             System.out.println("Itinerary Reserved");
                         else
                             System.out.println("Itinerary could not be reserved.");
@@ -421,7 +425,10 @@ public class Client {
                         int customer = getInt(arguments.elementAt(2));
 
                         boolean c = proxy.newCustomerId(id, customer);
-                        System.out.println("new customer id: " + customer);
+	                    if (c)
+                            System.out.println("New customer id: " + customer);
+	                    else
+		                    System.out.println("Customer already exists");
                         break;
                     }
                     case 23: { //start transaction
@@ -429,9 +436,8 @@ public class Client {
                             wrongNumber();
                             break;
                         }
-                        System.out.printf("Starting a transaction with id...");
                         int transactionId = proxy.start();
-                        System.out.printf("%d.Done.\n", transactionId);
+                        System.out.printf("Transaction %d started.\n", transactionId);
                         break;
                     }
                     case 24: { //commit transaction
@@ -727,7 +733,7 @@ public class Client {
                 System.out.println("\tBook one or more flights.Also book zero or more cars/rooms at a location.");
                 System.out.println("\nUsage: ");
                 System.out.println("\titinerary, <id>, <customerid>, "
-                        + "<flightnumber1>....<flightnumberN>, "
+                        + "<flightnumber1>,...,<flightnumberN>, "
                         + "<LocationToBookcarsOrrooms>, <NumberOfcars>, <NumberOfroom>");
                 break;
             
