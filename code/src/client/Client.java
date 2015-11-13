@@ -451,7 +451,7 @@ public class Client {
                             break;
                         }
                         int transactionId = getInt(arguments.elementAt(1));
-                        boolean success = proxy.commit(transactionId);
+                        boolean success = proxy.abort(transactionId);
                         if (success)
                             System.out.printf("Transaction %d aborted.\n", transactionId);
                         else

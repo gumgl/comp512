@@ -9,7 +9,7 @@ import java.util.HashSet;
 public class Transaction {
     protected final int id;
     protected State state = State.STARTED;
-    protected final HashSet<ResourceManager> enlistedRMs = new HashSet<ResourceManager>();
+    protected final HashSet<ResourceManager> enlistedRMs = new HashSet<>();
     /* Local copy of the items */
     public final RMHashtable cacheValues = new RMHashtable();
     /* What objects have been modified */

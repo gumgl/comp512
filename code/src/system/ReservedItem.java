@@ -17,12 +17,16 @@ public class ReservedItem extends RMItem {
     private String m_strReservableItemKey;
     private String m_strLocation;
 
+    public ReservedItem() {}
     ReservedItem(String key, String location, int count, int price) {
         super();
         m_strReservableItemKey = key;
         m_strLocation = location;
         m_nCount = count;
         m_nPrice = price;
+    }
+
+    protected void copyInternals(ReservedItem item) {
     }
 
     public String getReservableItemKey() { 
@@ -63,4 +67,12 @@ public class ReservedItem extends RMItem {
         return s.toLowerCase();
     }
 
+    public ReservedItem copy() {
+        ReservedItem cpy = new ReservedItem();
+        cpy.m_strReservableItemKey = this.m_strReservableItemKey;
+        cpy.m_strLocation = this.m_strLocation;
+        cpy.m_nCount = this.m_nCount;
+        cpy.m_nPrice = this.m_nPrice;
+        return cpy;
+    }
 }
