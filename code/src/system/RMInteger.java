@@ -30,7 +30,7 @@ public class RMInteger extends RMItem implements Serializable {
         return String.valueOf(m_value);
     }
 
-    @Override
+	@Override
     public RMInteger copy() {
         return new RMInteger(m_value);
     }

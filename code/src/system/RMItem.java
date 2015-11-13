@@ -12,10 +12,10 @@ import java.io.*;
 
 public abstract class RMItem implements Serializable, Cloneable {
 
-    RMItem() {
-        super();
-    }
+	RMItem() {
+		super();
+	}
 
-    public abstract RMItem copy();
+	public abstract RMItem copy();
 }
 

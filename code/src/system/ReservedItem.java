@@ -12,67 +12,67 @@ package system;
 
 public class ReservedItem extends RMItem {
 
-    private int m_nCount;
-    private int m_nPrice;
-    private String m_strReservableItemKey;
-    private String m_strLocation;
+	private int m_nCount;
+	private int m_nPrice;
+	private String m_strReservableItemKey;
+	private String m_strLocation;
 
-    public ReservedItem() {}
-    ReservedItem(String key, String location, int count, int price) {
-        super();
-        m_strReservableItemKey = key;
-        m_strLocation = location;
-        m_nCount = count;
-        m_nPrice = price;
-    }
+	public ReservedItem() {}
+	ReservedItem(String key, String location, int count, int price) {
+		super();
+		m_strReservableItemKey = key;
+		m_strLocation = location;
+		m_nCount = count;
+		m_nPrice = price;
+	}
 
-    protected void copyInternals(ReservedItem item) {
-    }
+	protected void copyInternals(ReservedItem item) {
+	}
 
-    public String getReservableItemKey() { 
-        return m_strReservableItemKey; 
-    }
+	public String getReservableItemKey() {
+		return m_strReservableItemKey;
+	}
 
-    public String getLocation() {
-        return m_strLocation; 
-    }
+	public String getLocation() {
+		return m_strLocation;
+	}
 
-    public void setCount(int count) {
-        m_nCount = count; 
-    }
+	public void setCount(int count) {
+		m_nCount = count;
+	}
 
-    public int getCount() { 
-        return m_nCount; 
-    }
+	public int getCount() {
+		return m_nCount;
+	}
 
-    public void setPrice(int price) { 
-        m_nPrice = price; 
-    }
+	public void setPrice(int price) {
+		m_nPrice = price;
+	}
 
-    public int getPrice() { 
-        return m_nPrice; 
-    }
+	public int getPrice() {
+		return m_nPrice;
+	}
 
-    public String toString() { 
-        return "hashkey = " + getKey() + ", " 
-                + "reservableItemKey = " + getReservableItemKey() + ", "
-                + "count = " + getCount() + ", price = " + getPrice(); 
-    }
+	public String toString() {
+		return "hashkey = " + getKey() + ", "
+				+ "reservableItemKey = " + getReservableItemKey() + ", "
+				+ "count = " + getCount() + ", price = " + getPrice();
+	}
 
-    // Note: hashKey is the same as the ReservableItem hashkey.  This would 
-    // have to change if we weren't lumping all reservable items under the 
-    // same price.
-    public String getKey() {
-        String s = getReservableItemKey();
-        return s.toLowerCase();
-    }
+	// Note: hashKey is the same as the ReservableItem hashkey.  This would
+	// have to change if we weren't lumping all reservable items under the
+	// same price.
+	public String getKey() {
+		String s = getReservableItemKey();
+		return s.toLowerCase();
+	}
 
-    public ReservedItem copy() {
-        ReservedItem cpy = new ReservedItem();
-        cpy.m_strReservableItemKey = this.m_strReservableItemKey;
-        cpy.m_strLocation = this.m_strLocation;
-        cpy.m_nCount = this.m_nCount;
-        cpy.m_nPrice = this.m_nPrice;
-        return cpy;
-    }
+	public ReservedItem copy() {
+		ReservedItem cpy = new ReservedItem();
+		cpy.m_strReservableItemKey = this.m_strReservableItemKey;
+		cpy.m_strLocation = this.m_strLocation;
+		cpy.m_nCount = this.m_nCount;
+		cpy.m_nPrice = this.m_nPrice;
+		return cpy;
+	}
 }
