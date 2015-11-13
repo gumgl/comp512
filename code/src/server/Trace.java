@@ -18,18 +18,25 @@ public class Trace {
 	private static final boolean printErrors = true;
 
 	private static String getStatus() {
-		String callingClass = new Exception().getStackTrace()[2].getClassName();
+		StackTraceElement ste = new Exception().getStackTrace()[3];
+		String callingClass = (ste == null) ? "Anonymous" : ste.getClassName();
 		String threadID = Thread.currentThread().getName();
 		return threadID + "[" + callingClass + "]";
 	}
 
 	private static void printMessage(PrintStream o, String name, String msg) {
-		o.println(name + " " + getStatus() + " " + msg);
+		if (o != null && !o.checkError())
+			o.println(name + " " + getStatus() + " " + msg);
 	}
 
 	public static void info(String msg) {
 		if (printInfo)
 			printMessage(System.out, " INFO", msg);
+	}
+
+	public static void info(String msg, Throwable e) {
+		if (printInfo)
+			printMessage(System.out, " INFO", msg + ": " + throwableToString(e));
 	}
 
 	public static void warn(String msg) {
@@ -40,6 +47,21 @@ public class Trace {
 	public static void error(String msg) {
 		if (printErrors)
 			printMessage(System.err, "ERROR", msg);
+	}
+
+	public static void error(Exception e) {
+		if (printErrors)
+			printMessage(System.err, "ERROR", throwableToString(e));
+	}
+
+	public static void error(String msg, Throwable e) {
+		if (printErrors)
+			printMessage(System.err, "ERROR", msg + ": " + throwableToString(e));
+	}
+
+	public static String throwableToString(Throwable e) {
+		return ((e != null) ? e.getClass().getName() : "null")
+				+ "(" + e.getMessage() + ")";
 	}
 
 }
