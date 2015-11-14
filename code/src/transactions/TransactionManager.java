@@ -42,20 +42,21 @@ public class TransactionManager {
 			Transaction t = getTransaction(tid);
 			if (t == null)
 				throw new InvalidTransactionIDException(tid);
-			else if (!t.isAwareOf(key)) { // Item not seen before
-				Trace.info(String.format("Read new item %s for T%d", key, tid));
-
-				// Note: reading an item that does not exist returns null, but it is still a fully-qualified read.
-				Trace.info("Requesting READ lock...");
+			else {
 				this.LM.Lock(tid, key, LockManager.READ); // Request READ lock
-				Trace.info("READ Lock received!");
-				RMItem value = (RMItem) items.get(key); // Copy from RM
-				if (value != null) // Otherwise, value is already null
-					t.cacheValues.put(key, value.copy()); // Cache it
-				return value;
-			} else {
-				Trace.info("Get cached item");
-				return (RMItem) t.cacheValues.get(key); // Return cached copy
+				if (!t.isAwareOf(key)) { // Item not seen before
+					Trace.info(String.format("Read new item %s for T%d", key, tid));
+					// Note: reading an item that does not exist returns null, but it is still a fully-qualified read.
+					Trace.info("Requesting READ lock...");
+					Trace.info("READ Lock received!");
+					RMItem value = (RMItem) items.get(key); // Copy from RM
+					if (value != null) // Otherwise, value is already null
+						t.cacheValues.put(key, value.copy()); // Cache it
+					return value;
+				} else {
+					Trace.info("Get cached item");
+					return (RMItem) t.cacheValues.get(key); // Return cached copy
+				}
 			}
 		}
 	}
@@ -68,12 +69,14 @@ public class TransactionManager {
 
 			if (t == null)
 				throw new InvalidTransactionIDException(tid);
-			else if (!t.isAwareOf(key)) { // Item not seen before
-				Trace.info(String.format("Write new item %s for T%d", key, tid));
-				Trace.info("Requesting WRITE lock...");
+			else {
 				this.LM.Lock(tid, key, LockManager.WRITE); // Request WRITE lock
-				Trace.info("WRITE Lock received!");
-				t.cacheChanged.add(key); // Remember that we've changed the item
+				if (!t.isAwareOf(key)) { // Item not seen before
+					Trace.info(String.format("Write new item %s for T%d", key, tid));
+					Trace.info("Requesting WRITE lock...");
+					Trace.info("WRITE Lock received!");
+					t.cacheChanged.add(key); // Remember that we've changed the item
+				}
 			}
 
 			Trace.info("Write item to cache");
@@ -138,6 +141,7 @@ public class TransactionManager {
 				t.state = State.ABORTED;
 				t.cacheValues.clear();
 				t.cacheChanged.clear();
+				LM.UnlockAll(tid); // Release all locks held locally
 				for (ResourceManager rm : t.enlistedRMs)
 					rm.abort(tid);
 				return true;
