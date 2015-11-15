@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<project basedir="." default="help" name="project">
+<project basedir="" default="help" name="project">
     <property name="rm.flight.host" value="localhost"/>
     <property name="rm.flight.port" value="8081"/>
     <property name="rm.car.host" value="localhost"/>

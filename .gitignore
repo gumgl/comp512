@@ -1,3 +1,6 @@
+build
+webapps
+
 *.class
 
 # Mobile Tools for Java (J2ME)
@@ -12,15 +15,14 @@
 hs_err_pid*
 
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm, CLion, Android Studio
-
-*.iml
+#*.iml
 
 ## Directory-based project format:
 .idea/
 # if you remove the above rule, at least ignore the following:
 
 # User-specific stuff:
- .idea/workspace.xml
+# .idea/workspace.xml
 # .idea/tasks.xml
 # .idea/dictionaries
 # .idea/shelf
