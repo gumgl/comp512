@@ -1,0 +1,10 @@
+start
+newflight,1,1,50,1
+newcar,1,6,60,1
+newroom,1,6,100,1
+newcustomerid,1,222
+help,itinerary
+itinerary,1,222,1,6,5,20
+commit,1
+start
+querycustomer,2,222
