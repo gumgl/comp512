@@ -27,9 +27,6 @@ public abstract class ResourceManager {
 		FLIGHT, ROOM, CAR, CUSTOMER, MIDDLEWARE
 	}
 
-	/* Whether we should keep interating with this RM */
-	public boolean active = true;
-
 	abstract public String getName();
 
 	// Flight operations //

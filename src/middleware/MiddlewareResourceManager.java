@@ -320,7 +320,6 @@ public class MiddlewareResourceManager extends ResourceManager {
 		success &= flightRM.shutdown();
 		success &= carRM.shutdown();
 		success &= roomRM.shutdown();
-		active = !success;
 		return success;
 	}
 

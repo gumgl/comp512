@@ -23,7 +23,7 @@ public class LocalResourceManager extends ResourceManager {
 	public LocalResourceManager(ResourceManager.Type type) {
 		this.type = type;
 		this.storagePath = "./persistent/" + type.name().toLowerCase() + "/";
-		TM  = new TransactionManager();
+		TM  = new TransactionManager(this);
 
 		loadItemsDB();
 		loadPendingTransactions();

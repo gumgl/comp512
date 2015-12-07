@@ -484,7 +484,7 @@ public class Client {
                             break;
                         }
                         int transactionId = getInt(arguments.elementAt(1));
-                        boolean success = proxy.commit(transactionId);
+                        boolean success = proxy.commit2PC(transactionId);
                         if (success)
                             System.out.printf("Transaction %d committed.\n", transactionId);
                         else

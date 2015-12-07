@@ -3,6 +3,7 @@ package transactions;
 import locks.DeadlockException;
 import locks.LockManager;
 import server.Trace;
+import system.LocalResourceManager;
 import system.ResourceManager;
 import system.RMHashtable;
 import system.RMItem;
@@ -25,6 +26,12 @@ public class TransactionManager {
 
 	protected Transaction getTransaction(int id) {
 		return transactions.get(id);
+	}
+
+	public final LocalResourceManager RM;
+
+	public TransactionManager(LocalResourceManager RM) {
+		this.RM = RM;
 	}
 
 	/* Add a ResourceManager to the list of involved RMs */
@@ -148,7 +155,8 @@ public class TransactionManager {
 			// Notify all enlisted RMs to commit
 			// Might take a long time while we have a lock on t but that's fine since we're ending t
 			for (ResourceManager rm : t.enlistedRMs)
-				rm.commit(tid);
+				if (rm != this.RM) // prevent from calling ourself
+					rm.commit(tid);
 			return true;
 		}
 	}
@@ -176,10 +184,11 @@ public class TransactionManager {
 				}
 
 				if (success) { // Apply result of vote
-					for (ResourceManager rm : t.enlistedRMs) {
-						Trace.info(String.format("TM: Committing %s-RM for T%d", rm.getName(), tid));
-						success &= rm.abort(tid);
-					}
+					for (ResourceManager rm : t.enlistedRMs)
+						if (rm != this.RM) { // prevent from calling ourself
+							Trace.info(String.format("TM: Committing %s-RM for T%d", rm.getName(), tid));
+							success &= rm.commitFinish(tid);
+						}
 				} else {
 					for (ResourceManager rm : t.enlistedRMs) {
 						Trace.info(String.format("TM: Aborting %s-RM for T%d", rm.getName(), tid));
@@ -211,7 +220,7 @@ public class TransactionManager {
 
 		Transaction t = transactions.get(tid);
 		synchronized (t) {
-			if (!isTransactionIdValid(tid)) // Transaction does not exist or not in correct state
+			if (!isTransactionIdValidForCommitFinish(tid)) // Transaction does not exist or not in correct state
 				throw new InvalidTransactionIDException(tid);
 			else {
 				return localCommit(t);
@@ -232,7 +241,8 @@ public class TransactionManager {
 				t.cacheChanged.clear();
 				LM.UnlockAll(tid); // Release all locks held locally
 				for (ResourceManager rm : t.enlistedRMs)
-					rm.abort(tid);
+					if (rm != this.RM) // prevent from calling ourself
+						rm.abort(tid);
 				return true;
 			}
 		}

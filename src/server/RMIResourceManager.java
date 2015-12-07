@@ -277,7 +277,6 @@ public class RMIResourceManager extends ResourceManager {
 	public boolean shutdown() {
 		Invocation invocation = new Invocation("shutdown");
 		boolean success = (Boolean) target.invoke(invocation);
-		active = !success;
 		return success;
 	}
 

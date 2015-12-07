@@ -35,7 +35,7 @@ public class Receiver extends Thread {
 			inStream = new ObjectInputStream(clientSocket.getInputStream());
 			//Trace.info("InputStream created");
 
-			while(localResource.active) { // Read requests forever...
+			while(localResource.isAvailable()) { // Read requests forever...
 				//Trace.info("Ready for an Invocation...");
 				Invocation invocation;
 				synchronized(inStream) {
