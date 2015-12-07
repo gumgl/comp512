@@ -38,25 +38,25 @@ public class TransactionManager {
 	/* Read an RMItem within a transaction */
 	public RMItem read(int tid, String key) throws DeadlockException {
 		Trace.info(String.format("TM::read(%d,%s)", tid, key));
-		synchronized(items) {
-			Transaction t = getTransaction(tid);
-			if (t == null)
-				throw new InvalidTransactionIDException(tid);
-			else {
-				this.LM.Lock(tid, key, LockManager.READ); // Request READ lock
-				if (!t.isAwareOf(key)) { // Item not seen before
-					Trace.info(String.format("Read new item %s for T%d", key, tid));
-					// Note: reading an item that does not exist returns null, but it is still a fully-qualified read.
-					Trace.info("Requesting READ lock...");
-					Trace.info("READ Lock received!");
+		Transaction t = getTransaction(tid);
+		if (t == null)
+			throw new InvalidTransactionIDException(tid);
+		else {
+			this.LM.Lock(tid, key, LockManager.READ); // Request READ lock
+			if (!t.isAwareOf(key)) { // Item not seen before
+				Trace.info(String.format("Read new item %s for T%d", key, tid));
+				// Note: reading an item that does not exist returns null, but it is still a fully-qualified read.
+				Trace.info("Requesting READ lock...");
+				Trace.info("READ Lock received!");
+				//synchronized(items) { // we use Java's synchronization for the multiple threads and our LM for the many transactions
 					RMItem value = (RMItem) items.get(key); // Copy from RM
 					if (value != null) // Otherwise, value is already null
 						t.cacheValues.put(key, value.copy()); // Cache it
 					return value;
-				} else {
-					Trace.info("Get cached item");
-					return (RMItem) t.cacheValues.get(key); // Return cached copy
-				}
+				//}
+			} else {
+				Trace.info("Get cached item");
+				return (RMItem) t.cacheValues.get(key); // Return cached copy
 			}
 		}
 	}
@@ -64,27 +64,25 @@ public class TransactionManager {
 	/* Write an RMItem within a transaction */
 	public void write(int tid, String key, RMItem value) throws DeadlockException {
 		Trace.info(String.format("TM::write(%d,%s,%s)", tid, key, value));
-		synchronized(items) {
-			Transaction t = getTransaction(tid);
+		Transaction t = getTransaction(tid);
 
-			if (t == null)
-				throw new InvalidTransactionIDException(tid);
-			else {
-				this.LM.Lock(tid, key, LockManager.WRITE); // Request WRITE lock
-				if (!t.isAwareOf(key)) { // Item not seen before
-					Trace.info(String.format("Write new item %s for T%d", key, tid));
-					Trace.info("Requesting WRITE lock...");
-					Trace.info("WRITE Lock received!");
-					t.cacheChanged.add(key); // Remember that we've changed the item
-				}
+		if (t == null)
+			throw new InvalidTransactionIDException(tid);
+		else {
+			this.LM.Lock(tid, key, LockManager.WRITE); // Request WRITE lock
+			if (!t.isAwareOf(key)) { // Item not seen before
+				Trace.info(String.format("Write new item %s for T%d", key, tid));
+				Trace.info("Requesting WRITE lock...");
+				Trace.info("WRITE Lock received!");
+				t.cacheChanged.add(key); // Remember that we've changed the item
 			}
-
-			Trace.info("Write item to cache");
-			if (value == null)
-				t.cacheValues.put(key, null);
-			else // Cache the new value
-				t.cacheValues.put(key, value.copy());
 		}
+
+		Trace.info("Write item to cache");
+		if (value == null)
+			t.cacheValues.put(key, null);
+		else // Cache the new value
+			t.cacheValues.put(key, value.copy());
 	}
 
 	/* Start a new transaction and with a new ID */
@@ -113,19 +111,52 @@ public class TransactionManager {
 			if (!isTransactionIdValid(tid)) // Transaction does not exist or not in correct state
 				throw new InvalidTransactionIDException(tid);
 			else synchronized (items) {
-				for (String key : t.cacheChanged) { // Store all changes to global storage
-					RMItem value = t.cacheValues.get(key);
-					if (value == null)
-						items.put(key, null);
-					else
-						items.put(key, value.copy());
-				}
-				LM.UnlockAll(tid); // Release all locks held locally
-				t.state = State.COMMITTED;
+				Trace.info(String.format("TM: Committing transaction %d", tid));
+
+				localCommit(t);
 				// Notify all enlisted RMs to commit
 				// Might take a long time while we have a lock on t but that's fine since we're ending t
 				for (ResourceManager rm : t.enlistedRMs)
-					rm.commit(tid); // TODO: Possible infinite loop because they will all call each other
+					rm.commit(tid);
+				return true;
+			}
+		}
+	}
+
+
+	private boolean localCommit(Transaction t) {
+		synchronized (items) {
+			Trace.info(String.format("TM: LOCAL Committing transaction %d", t.id));
+			for (String key : t.cacheChanged) { // Store all changes to global storage
+				RMItem value = t.cacheValues.get(key);
+				if (value == null)
+					items.put(key, null);
+				else
+					items.put(key, value.copy());
+			}
+			LM.UnlockAll(t.id); // Release all locks held locally
+			t.state = State.COMMITTED;
+			return true;
+		}
+	}
+
+	/* Commit the transaction to persistant storage */
+	public boolean commitRequest(int tid) {
+		
+		return true;
+	}
+
+	/* Two-phase commit */
+	public boolean commit2PC(int tid) {
+		Transaction t = transactions.get(tid);
+		synchronized (t) {
+			if (!isTransactionIdValid(tid)) // Transaction does not exist or not in correct state
+				throw new InvalidTransactionIDException(tid);
+			else synchronized (items) {
+				Trace.info(String.format("TM: 2PC transaction %d", tid));
+
+				for (ResourceManager rm : t.enlistedRMs)
+					rm.commit(tid);
 				return true;
 			}
 		}
@@ -138,6 +169,7 @@ public class TransactionManager {
 			if (!isTransactionIdValid(tid)) // Transaction does not exist or not in correct state
 				throw new InvalidTransactionIDException(tid);
 			else {
+				Trace.info(String.format("TM: Aborting transaction %d", tid));
 				t.state = State.ABORTED;
 				t.cacheValues.clear();
 				t.cacheChanged.clear();

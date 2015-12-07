@@ -7,6 +7,7 @@ package server;
 
 import rmi.Invocation;
 import rmi.Invokable;
+import system.RMHashtable;
 import system.ResourceManager;
 
 import java.util.Vector;
@@ -159,6 +160,14 @@ public class RMIResourceManager extends ResourceManager {
 	}
 
 	@Override
+	public RMHashtable getCustomerReservations(int tid, int customerId) {
+		Invocation invocation = new Invocation("getCustomerReservations");
+		invocation.addParam(tid);
+		invocation.addParam(customerId);
+		return (RMHashtable) target.invoke(invocation);
+	}
+
+	@Override
 	public String queryCustomerInfo(int tid, int customerId) {
 		Invocation invocation = new Invocation("queryCustomerInfo");
 		invocation.addParam(tid);
@@ -225,6 +234,13 @@ public class RMIResourceManager extends ResourceManager {
 	@Override
 	public boolean commit(int transactionId) {
 		Invocation invocation = new Invocation("commit");
+		invocation.addParam(transactionId);
+		return (Boolean) target.invoke(invocation);
+	}
+
+	@Override
+	public boolean commitRequest(int transactionId) {
+		Invocation invocation = new Invocation("commitRequest");
 		invocation.addParam(transactionId);
 		return (Boolean) target.invoke(invocation);
 	}

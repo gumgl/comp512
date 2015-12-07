@@ -5,7 +5,10 @@ import rmi.SocketSender;
 import server.RMIResourceManager;
 import server.Server;
 import server.Trace;
+import system.LocalResourceManager;
 import system.ResourceManager;
+import transactions.Transaction;
+import transactions.TransactionManager;
 
 import java.io.IOException;
 import java.io.UncheckedIOException;
@@ -15,10 +18,11 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class MiddlewareServer extends Server {
-	protected ExecutorService executorService = Executors.newFixedThreadPool(4);;
 	/* Simply for setup so we have access to them in setupResourceManager() */
 	ArrayList<InetAddress> RMaddresses;
 	ArrayList<Integer> RMports;
+	LocalResourceManager customerRM;
+	//TransactionManager TM;
 
 	public static void main(String[] args) throws Exception {
 		int offset = 1;
@@ -38,45 +42,23 @@ public class MiddlewareServer extends Server {
 		server.start();
 	}
 
-	@Override
-	public void start() {
-		Trace.info("Trying to connect to the ResourceManagers...");
-		// the MiddlewareResourceManager will forward all received RMIs to the specific RMs
-		rm = new MiddlewareResourceManager(
-				new RMIResourceManager(new SocketSender(RMaddresses.get(0), RMports.get(0))),
-				new RMIResourceManager(new SocketSender(RMaddresses.get(1), RMports.get(1))),
-				new RMIResourceManager(new SocketSender(RMaddresses.get(2), RMports.get(2))));
-
-		Thread.setDefaultUncaughtExceptionHandler(
-			new Thread.UncaughtExceptionHandler() {
-				@Override public void uncaughtException(Thread t, Throwable e) {
-					Trace.info("Client connection lost", e);
-				}
-			});
-
-		while (rm.active) { // While we are active
-			try { // Accept incoming client connections
-				//Trace.info("Waiting for client connection...");
-				Socket clientSocket = serverSocket.accept();
-
-				Trace.info("New client!");
-				receiver = new Receiver(clientSocket, rm);
-				executorService.execute(receiver);
-			} /*catch (UncheckedIOException e) { // Meant to come from receiver but we won't get it since it's in a thread pool
-				Trace.info("Client connection lost", e.getCause());
-			}*/ catch (IOException e) {
-				Trace.error("Problem with the ServerSocket");
-				e.printStackTrace(System.err);
-			}
-		}
-		Trace.info("Server shut down. Good bye.");
-	}
-
 	public MiddlewareServer(int port, ArrayList<InetAddress> RMaddresses, ArrayList<Integer> RMports) throws IOException {
 		super(port);
-
-		// Store addresses and ports so that when Server calls setupResourceManager, we have access to them
+		this.customerRM = new LocalResourceManager();
+		//this.TM = new TransactionManager();
+		// Store addresses and ports so that when Server calls setupRM, we have access to them
 		this.RMaddresses = RMaddresses;
 		this.RMports = RMports;
+	}
+
+	@Override
+	public ResourceManager setupRM() {
+		Trace.info("Connecting to individual RMs...");
+		// Every client creates a new thread with new network-RMs but the same customer RM
+		return new MiddlewareResourceManager(
+				new RMIResourceManager(new SocketSender(RMaddresses.get(0), RMports.get(0))),
+				new RMIResourceManager(new SocketSender(RMaddresses.get(1), RMports.get(1))),
+				new RMIResourceManager(new SocketSender(RMaddresses.get(2), RMports.get(2))),
+				this.customerRM);
 	}
 }

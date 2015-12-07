@@ -13,6 +13,7 @@ import java.net.Socket;
 
 public class RMServer extends Server {
 	public final Class type;
+	LocalResourceManager localRM;
 
 	public static void main(String[] args) throws Exception {
 
@@ -39,31 +40,14 @@ public class RMServer extends Server {
 		server.start();
 	}
 
-	@Override
-	public void start() {
-		rm = new LocalResourceManager();
-
-		// Setup our RM receiving the RMIs
-		while (rm.active) {
-			try {
-				Trace.info("Ready for a middleware to connect...");
-				Socket clientSocket = serverSocket.accept();
-				Trace.info("Connection established!");
-				receiver = new Receiver(clientSocket, rm);
-				receiver.run(); // No need to run in a separate thread here
-				Trace.info("Connection ended.");
-			} catch (UncheckedIOException e) {
-				Trace.info("Middleware connection lost", e.getCause());
-			} catch (IOException e) {
-				Trace.error("ServerSocket problem");
-				e.printStackTrace(System.err);
-			}
-		}
-		Trace.info("Server shut down. Good bye.");
-	}
-
 	public RMServer(int port, Class type) throws IOException {
 		super(port);
 		this.type = type;
+		localRM = new LocalResourceManager();
+	}
+
+	@Override
+	public ResourceManager setupRM() {
+		return localRM;
 	}
 }

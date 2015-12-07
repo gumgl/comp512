@@ -485,7 +485,7 @@ public class Client {
             } catch (InvalidTransactionIDException|DeadlockException e) {
                 Trace.error(e);
             } catch (RuntimeException e) {
-                Trace.error("Uncaught", e);
+                Trace.error("Uncaught exception returned by server:");
                 e.printStackTrace(System.out);
             }
         }

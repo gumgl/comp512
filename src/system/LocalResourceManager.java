@@ -547,6 +547,12 @@ public class LocalResourceManager extends ResourceManager {
         return TM.commit(transactionId);
     }
 
+    @Override
+    public boolean commitRequest(int transactionId) {
+        Trace.info(String.format("RM::commitRequest(%d)", transactionId));
+        return TM.commitRequest(transactionId);
+    }
+
     /* Not actually used in this implementation, only in MiddlewareResourceManager */
     @Override
     public boolean abort(int transactionId) {

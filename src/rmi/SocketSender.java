@@ -40,7 +40,7 @@ public class SocketSender implements Invokable {
 				inStream = new ObjectInputStream(newSocket.getInputStream());
 				return newSocket; // Successful connection, break out of loop
 			} catch (IOException e) { // Retry until success...
-				//Trace.error("Failed, trying again...");
+				Trace.error("Failed, trying again...", e);
 			}
 		}
 	}
@@ -51,9 +51,14 @@ public class SocketSender implements Invokable {
 
 		while (true) { // As many attempts as it takes to perform the Invocation
 			try {
-				outStream.writeObject(invocation);
+				synchronized (outStream) {
+					outStream.writeObject(invocation);
+				}
 				Trace.info("Sent! Waiting for response...");
-				Response response = (Response) inStream.readObject();
+				Response response;
+				synchronized (inStream) {
+					response = (Response) inStream.readObject();
+				}
 				Trace.info("Response received: " + response.toString());
 
 				if (response.getException() != null)
@@ -61,7 +66,7 @@ public class SocketSender implements Invokable {
 				else
 					return response.getReturnValue();
 			} catch (IOException e) {
-				Trace.error("Error with socket, reconnecting", e);
+				Trace.error("Error with socket, reconnecting...", e);
 				socket = setupSocket();
 				//throw new UncheckedIOException(e);
 			} catch (ClassNotFoundException e) {

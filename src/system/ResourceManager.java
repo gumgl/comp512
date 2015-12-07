@@ -104,6 +104,9 @@ public abstract class ResourceManager {
 	/* Remove this customer and all their associated reservations. */
 	abstract public boolean deleteCustomer(int tid, int customerId);
 
+	/*Return data structure containing customer reservation info */
+	abstract public RMHashtable getCustomerReservations(int tid, int customerId);
+
 	/* Return a bill. */
 	abstract public String queryCustomerInfo(int tid, int customerId);
 
@@ -129,6 +132,9 @@ public abstract class ResourceManager {
 
 	/* Attempt to commit the given transaction; return true upon success */
 	abstract public boolean commit(int transactionId);
+
+	/* Prepare to commit */
+	abstract public boolean commitRequest(int transactionId);
 
 	/* Abort the given transaction */
 	abstract public boolean abort(int transactionId);

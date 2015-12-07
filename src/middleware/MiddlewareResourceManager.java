@@ -1,7 +1,7 @@
 package middleware;
 
-import server.RMIResourceManager;
 import server.Trace;
+import system.RMHashtable;
 import system.ResourceManager;
 import system.LocalResourceManager;
 import transactions.InvalidTransactionIDException;
@@ -9,25 +9,30 @@ import transactions.TransactionManager;
 
 import java.util.Vector;
 
-//TODO: Find a way to accumulate operations' RMIs until commit
+/*
+ * RM who the dispatches queries into separate specialized RMs
+ */
 public class MiddlewareResourceManager extends ResourceManager {
 
-    RMIResourceManager flightRM;
-    RMIResourceManager carRM;
-    RMIResourceManager roomRM;
-    LocalResourceManager customerRM = new LocalResourceManager();
+    ResourceManager flightRM;
+    ResourceManager carRM;
+    ResourceManager roomRM;
+    LocalResourceManager customerRM;
     TransactionManager TM;
     /*private final ConcurrentHashMap<Integer, Integer> customerIds =
             new ConcurrentHashMap<Integer, Integer>();*/
 
-    public MiddlewareResourceManager(RMIResourceManager flightRM,
-                                     RMIResourceManager carRM,
-                                     RMIResourceManager roomRM) {
+    public MiddlewareResourceManager(ResourceManager flightRM,
+                                     ResourceManager carRM,
+                                     ResourceManager roomRM,
+                                     LocalResourceManager customerRM/*,
+                                     TransactionManager tm*/) {
         this.flightRM = flightRM;
         this.carRM = carRM;
         this.roomRM = roomRM;
+        this.customerRM = customerRM;
 
-        this.TM = new TransactionManager(); // We need it for
+        this.TM = customerRM.TM; // We need it to coordinate transaction IDs
     }
 
     /* Same logic for all operations.
@@ -133,7 +138,39 @@ public class MiddlewareResourceManager extends ResourceManager {
         return success;
     }
 
-    @Override
+	@Override
+	public RMHashtable getCustomerReservations(int tid, int customerId) {
+		RMHashtable toReturn = new RMHashtable();
+		RMHashtable toAdd;
+
+		toAdd = handleOperation(tid, customerRM).getCustomerReservations(tid, customerId);
+		if (toAdd == null)
+			return null;
+		else
+			toReturn.putAll(toAdd);
+
+		toAdd = handleOperation(tid, flightRM).getCustomerReservations(tid, customerId);
+		if (toAdd == null)
+			return null;
+		else
+			toReturn.putAll(toAdd);
+
+		toAdd = handleOperation(tid, carRM).getCustomerReservations(tid, customerId);
+		if (toAdd == null)
+			return null;
+		else
+			toReturn.putAll(toAdd);
+
+		toAdd = handleOperation(tid, roomRM).getCustomerReservations(tid, customerId);
+		if (toAdd == null)
+			return null;
+		else
+			toReturn.putAll(toAdd);
+
+		return toReturn;
+	}
+
+	@Override
     public String queryCustomerInfo(int tid, int customerId) {
         Trace.info("MW::queryCustomerInfo(" + tid + ", " + customerId + ")");
         handleOperation(tid, customerRM);
@@ -216,8 +253,9 @@ public class MiddlewareResourceManager extends ResourceManager {
     @Override
     public int start() {
         Trace.info("MW::start()");
-        int id = TM.start(); // First locally start with latest TC
-        customerRM.start(id);
+        //int id = TM.start(); // First locally start with latest TC
+        //customerRM.start(id);
+	    int id = customerRM.start();
         flightRM.start(id); // Then forward start with same TC
         carRM.start(id);
         roomRM.start(id);
@@ -243,9 +281,16 @@ public class MiddlewareResourceManager extends ResourceManager {
     public boolean commit(int transactionId) {
         Trace.info(String.format("MW::commit(%d)", transactionId));
         return TM.commit(transactionId); // The TM also takes care of calling t.enlistedTMs.commit()
+	    // TM then calls commit on the involved RMs
     }
 
-    @Override
+	@Override
+	public boolean commitRequest(int transactionId) {
+		Trace.info(String.format("MW::commit(%d)", transactionId));
+		return TM.commitRequest(transactionId); // The TM also takes care of calling t.enlistedTMs.commit()
+	}
+
+	@Override
     public boolean abort(int transactionId) {
         Trace.info(String.format("MW::abort(%d)", transactionId));
         return TM.abort(transactionId);
