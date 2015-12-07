@@ -44,7 +44,7 @@ public class MiddlewareServer extends Server {
 
 	public MiddlewareServer(int port, ArrayList<InetAddress> RMaddresses, ArrayList<Integer> RMports) throws IOException {
 		super(port);
-		this.customerRM = new LocalResourceManager();
+		this.customerRM = new LocalResourceManager(ResourceManager.Type.CUSTOMER);
 		//this.TM = new TransactionManager();
 		// Store addresses and ports so that when Server calls setupRM, we have access to them
 		this.RMaddresses = RMaddresses;
@@ -56,9 +56,9 @@ public class MiddlewareServer extends Server {
 		Trace.info("Connecting to individual RMs...");
 		// Every client creates a new thread with new network-RMs but the same customer RM
 		return new MiddlewareResourceManager(
-				new RMIResourceManager(new SocketSender(RMaddresses.get(0), RMports.get(0))),
-				new RMIResourceManager(new SocketSender(RMaddresses.get(1), RMports.get(1))),
-				new RMIResourceManager(new SocketSender(RMaddresses.get(2), RMports.get(2))),
+				new RMIResourceManager(new SocketSender(RMaddresses.get(0), RMports.get(0)), ResourceManager.Type.FLIGHT),
+				new RMIResourceManager(new SocketSender(RMaddresses.get(1), RMports.get(1)), ResourceManager.Type.CAR),
+				new RMIResourceManager(new SocketSender(RMaddresses.get(2), RMports.get(2)), ResourceManager.Type.ROOM),
 				this.customerRM);
 	}
 }

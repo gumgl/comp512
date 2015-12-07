@@ -1,49 +1,45 @@
 package server;
 
 
-import middleware.MiddlewareResourceManager;
-import rmi.Receiver;
-import rmi.SocketSender;
+import com.sun.media.sound.JARSoundbankReader;
 import system.*;
 import system.ResourceManager;
 
 import java.io.IOException;
-import java.io.UncheckedIOException;
-import java.net.Socket;
 
 public class RMServer extends Server {
-	public final Class type;
+	public final ResourceManager.Type type;
 	LocalResourceManager localRM;
 
 	public static void main(String[] args) throws Exception {
 
 		// Get the right port and RM type:
 		String stringType = args[0];
-		Class classType;
+		ResourceManager.Type type;
 		String stringPort;
 
 		if (stringType.equals("flight")) {
-			classType = system.Flight.class;
+			type = ResourceManager.Type.FLIGHT;
 			stringPort = args[1];
 		} else if (stringType.equals("car")) {
-			classType = system.Car.class;
+			type = ResourceManager.Type.CAR;
 			stringPort = args[2];
 		} else /*if (stringType.equals("room"))*/ {
-			classType = system.Room.class;
+			type = ResourceManager.Type.ROOM;
 			stringPort = args[3];
 		}
 		int port = Integer.parseInt(stringPort);
 
 		Trace.info(String.format("%s-type Server starting on port %s\n", stringType, stringPort));
 
-		RMServer server = new RMServer(port, classType);
+		RMServer server = new RMServer(port, type);
 		server.start();
 	}
 
-	public RMServer(int port, Class type) throws IOException {
+	public RMServer(int port, ResourceManager.Type type) throws IOException {
 		super(port);
 		this.type = type;
-		localRM = new LocalResourceManager();
+		localRM = new LocalResourceManager(type);
 	}
 
 	@Override

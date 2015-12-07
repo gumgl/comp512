@@ -6,7 +6,7 @@ package server;
 // -------------------------------
 
 import rmi.Invocation;
-import rmi.Invokable;
+import rmi.SocketSender;
 import system.RMHashtable;
 import system.ResourceManager;
 
@@ -18,13 +18,20 @@ import java.util.Vector;
 
 public class RMIResourceManager extends ResourceManager {
 
-	protected Invokable target;
+	protected SocketSender target;
+	public final ResourceManager.Type type;
 
-	public RMIResourceManager(Invokable target){
+	public RMIResourceManager(SocketSender target, ResourceManager.Type type){
 		this.target = target;
+		this.type = type;
 	}
 
 	// Flight operations //
+
+	@Override
+	public String getName() {
+		return "remote-"+type.name();
+	}
 
 	@Override
 	public boolean addFlight(int tid, int flightNumber,
@@ -239,8 +246,22 @@ public class RMIResourceManager extends ResourceManager {
 	}
 
 	@Override
+	public boolean commit2PC(int transactionId) {
+		Invocation invocation = new Invocation("commit2PC");
+		invocation.addParam(transactionId);
+		return (Boolean) target.invoke(invocation);
+	}
+
+	@Override
 	public boolean commitRequest(int transactionId) {
 		Invocation invocation = new Invocation("commitRequest");
+		invocation.addParam(transactionId);
+		return (Boolean) target.invoke(invocation);
+	}
+
+	@Override
+	public boolean commitFinish(int transactionId) {
+		Invocation invocation = new Invocation("commitFinish");
 		invocation.addParam(transactionId);
 		return (Boolean) target.invoke(invocation);
 	}
@@ -258,6 +279,11 @@ public class RMIResourceManager extends ResourceManager {
 		boolean success = (Boolean) target.invoke(invocation);
 		active = !success;
 		return success;
+	}
+
+	@Override
+	public boolean isAvailable() {
+		return target.isAvailable();
 	}
 
 }

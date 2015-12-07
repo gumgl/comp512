@@ -18,7 +18,7 @@ public class Client {
 
     public Client(InetAddress host, int port)
     throws Exception {
-        proxy = new RMIResourceManager(new SocketSender(host, port));
+        proxy = new RMIResourceManager(new SocketSender(host, port), ResourceManager.Type.MIDDLEWARE);
     }
 
     public static void main(String[] args) {
@@ -478,6 +478,19 @@ public class Client {
                             System.out.println("Servers did not shut down.");
                         break;
                     }
+                    case 27: { //commit 2PC transaction
+                        if (arguments.size() != 2) {
+                            wrongNumber();
+                            break;
+                        }
+                        int transactionId = getInt(arguments.elementAt(1));
+                        boolean success = proxy.commit(transactionId);
+                        if (success)
+                            System.out.printf("Transaction %d committed.\n", transactionId);
+                        else
+                            System.out.printf("Commit failed for transaction %d.\n", transactionId);
+                        break;
+                    }
                     default:
                         System.out.println("The interface does not support this command.");
                         break;
@@ -556,6 +569,8 @@ public class Client {
             return 25;
         else if (argument.compareToIgnoreCase("shutdown") == 0)
             return 26;
+        else if (argument.compareToIgnoreCase("commit2pc") == 0)
+            return 27;
         else
             return 666;
     }
@@ -780,11 +795,19 @@ public class Client {
 
             case 26:  //shutdown all servers
                 // TODO: change text
-                System.out.println("Abort the current transaction");
-                System.out.println("Purpose: Cancels all the operations");
+                System.out.println("Shutdown all servers");
+                System.out.println("Purpose: ");
                 System.out.println("\t");
                 System.out.println("\nUsage: ");
-                System.out.println("\tabort");
+                System.out.println("\tshutdown");
+                break;
+
+            case 27:  //commit transaction
+                System.out.println("Commit the current transaction using 2PC");
+                System.out.println("Purpose: ");
+                System.out.println("\tPerforms all the operations");
+                System.out.println("\nUsage: ");
+                System.out.println("\tcommit2pc, <id>");
                 break;
 
             default:

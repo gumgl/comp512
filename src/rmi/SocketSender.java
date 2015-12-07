@@ -5,7 +5,6 @@ import server.Trace;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.UncheckedIOException;
 import java.net.InetAddress;
 import java.net.Socket;
 
@@ -19,6 +18,7 @@ public class SocketSender implements Invokable {
 	Socket socket;
 	ObjectOutputStream outStream;
 	ObjectInputStream inStream;
+	private boolean available = false;
 
 	public SocketSender(InetAddress host, int port) {
 		this.host = host;
@@ -32,6 +32,7 @@ public class SocketSender implements Invokable {
 		while(true) {
 			try {
 				Socket newSocket = new Socket(this.host, this.port);
+				this.available = true;
 				Trace.info("Connected!");
 				outStream = new ObjectOutputStream(newSocket.getOutputStream());
 				//System.out.println("[SocketSender]OutputStream created");
@@ -41,6 +42,7 @@ public class SocketSender implements Invokable {
 				return newSocket; // Successful connection, break out of loop
 			} catch (IOException e) { // Retry until success...
 				Trace.error("Failed, trying again...", e);
+				this.available = false;
 			}
 		}
 	}
@@ -67,7 +69,8 @@ public class SocketSender implements Invokable {
 					return response.getReturnValue();
 			} catch (IOException e) {
 				Trace.error("Error with socket, reconnecting...", e);
-				socket = setupSocket();
+				this.available = false;
+				this.socket = setupSocket();
 				//throw new UncheckedIOException(e);
 			} catch (ClassNotFoundException e) {
 				Trace.error("Problem instantiating response");
@@ -75,5 +78,9 @@ public class SocketSender implements Invokable {
 				throw new ClassCastException();
 			}
 		}
+	}
+
+	public boolean isAvailable() {
+		return this.available;
 	}
 }

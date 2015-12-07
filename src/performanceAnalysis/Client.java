@@ -17,7 +17,7 @@ public class Client {
 
 	public Client(InetAddress host, int port)
 	throws Exception {
-		proxy = new RMIResourceManager(new SocketSender(host, port));
+		proxy = new RMIResourceManager(new SocketSender(host, port), ResourceManager.Type.MIDDLEWARE);
 	}
 
 	public static void main(String[] args) {

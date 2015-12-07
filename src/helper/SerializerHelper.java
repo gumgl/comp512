@@ -42,7 +42,7 @@ public class SerializerHelper<E extends Serializable>
 		return theFile.exists();
 	}
 	
-	public void saveToFile(E objectToSave)
+	public boolean saveToFile(E objectToSave)
 	{
 		try
 		(
@@ -55,7 +55,9 @@ public class SerializerHelper<E extends Serializable>
 		catch(IOException e)
 		{
 			System.out.println("ERROR (001): Failed to save file.");
+			return false;
 		}
+		return true;
 	}
 	
 	@SuppressWarnings("unchecked")
@@ -71,11 +73,11 @@ public class SerializerHelper<E extends Serializable>
 		}
 		catch(ClassNotFoundException e)
 		{
-			System.out.println("ERROR (002): Failed to load file.");
+			//System.out.println("ERROR (002): Failed to load file.");
 		}
 		catch(IOException e)
 		{
-			System.out.println("ERROR (003): Failed to load file.");
+			//System.out.println("ERROR (003): Failed to load file.");
 		}
 		
 		return null;

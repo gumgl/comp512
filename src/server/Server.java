@@ -24,7 +24,7 @@ public abstract class Server {
 	}
 
 	public void start() {
-		Trace.info("Server starting...");
+		//Trace.info("Server starting...");
 		// the MiddlewareResourceManager will forward all received RMIs to the specific RMs
 
 		Thread.setDefaultUncaughtExceptionHandler(

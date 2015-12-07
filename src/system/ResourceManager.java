@@ -23,8 +23,14 @@ import javax.jws.WebService;
 @WebService
 public abstract class ResourceManager {
 
+	public enum Type {
+		FLIGHT, ROOM, CAR, CUSTOMER, MIDDLEWARE
+	}
+
 	/* Whether we should keep interating with this RM */
 	public boolean active = true;
+
+	abstract public String getName();
 
 	// Flight operations //
 
@@ -133,12 +139,21 @@ public abstract class ResourceManager {
 	/* Attempt to commit the given transaction; return true upon success */
 	abstract public boolean commit(int transactionId);
 
+	/* Attempt to commit the given transaction with 2PC */
+	abstract public boolean commit2PC(int transactionId);
+
 	/* Prepare to commit */
 	abstract public boolean commitRequest(int transactionId);
+
+	/* Finish to commit */
+	abstract public boolean commitFinish(int transactionId);
 
 	/* Abort the given transaction */
 	abstract public boolean abort(int transactionId);
 
 	/* Shutdown the RM gracefully */
 	abstract public boolean shutdown();
+
+	/* If the RM is currently available for taking requests */
+	abstract public boolean isAvailable();
 }
