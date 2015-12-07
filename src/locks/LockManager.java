@@ -64,12 +64,26 @@ public class LockManager
 							// lock conversion
 							// *** ADD CODE HERE *** to carry out the lock conversion in the
 							// lock table
-							TrxnObj trxnObjR = new TrxnObj(xid, strData, TrxnObj.READ);
+							/*TrxnObj trxnObjR = new TrxnObj(xid, strData, TrxnObj.READ);
 							DataObj dataObjR = new DataObj(xid, strData, DataObj.READ);
 							this.lockTable.remove(trxnObjR);
 							this.lockTable.remove(dataObjR);
 							this.lockTable.add(trxnObj);
-							this.lockTable.add(dataObj);
+							this.lockTable.add(dataObj);*/
+							final Vector vect = LockManager.lockTable.elements(dataObj);
+							DataObj dataObj2;
+							final int size = vect.size();
+							for (int i = 0; i < size; i++) {
+								dataObj2 = (DataObj) vect.elementAt(i);
+								if (dataObj.getXId() == dataObj2.getXId() && dataObj2.getLockType() == TrxnObj.READ) {
+									final TrxnObj equiv = new TrxnObj(dataObj2.getXId(), dataObj2.getDataName(), dataObj2
+											.getLockType());
+									LockManager.lockTable.remove(dataObj2);
+									LockManager.lockTable.remove(equiv);
+								}
+							}
+							LockManager.lockTable.add(trxnObj);
+							LockManager.lockTable.add(dataObj);
 						} else {
 							// a lock request that is not lock conversion
 							this.lockTable.add(trxnObj);
@@ -105,69 +119,70 @@ public class LockManager
 
 		TrxnObj trxnQueryObj = new TrxnObj(xid, "", -1);  // Only used in elements() call below.
 		synchronized (this.lockTable) {
-			Vector vect = this.lockTable.elements(trxnQueryObj);
-
+			final Vector vect = this.lockTable.elements(trxnQueryObj);
 			TrxnObj trxnObj;
 			Vector waitVector;
 			WaitObj waitObj;
-			int size = vect.size();
-
+			DataObj dataObj2;
+			final int size = vect.size();
 			for (int i = (size - 1); i >= 0; i--) {
-
 				trxnObj = (TrxnObj) vect.elementAt(i);
 				this.lockTable.remove(trxnObj);
-
-				DataObj dataObj = new DataObj(trxnObj.getXId(), trxnObj.getDataName(), trxnObj.getLockType());
+				final DataObj dataObj = new DataObj(trxnObj.getXId(), trxnObj.getDataName(), trxnObj.getLockType());
 				this.lockTable.remove(dataObj);
-
 				// check if there are any waiting transactions.
 				synchronized (this.waitTable) {
 					// get all the transactions waiting on this dataObj
 					waitVector = this.waitTable.elements(dataObj);
-					int waitSize = waitVector.size();
+					final int waitSize = waitVector.size();
 					for (int j = 0; j < waitSize; j++) {
 						waitObj = (WaitObj) waitVector.elementAt(j);
 						if (waitObj.getLockType() == LockManager.WRITE) {
-							if (j == 0) {
-								// get all other transactions which have locks on the
-								// data item just unlocked.
-								Vector vect1 = this.lockTable.elements(dataObj);
-
-								// remove interrupted thread from waitTable only if no
-								// other transaction has locked this data item
-								if (vect1.size () == 0) {
-									this.waitTable.remove(waitObj);
-
-									try {
-										synchronized (waitObj.getThread())    {
-											waitObj.getThread().notify();
-										}
-									}
-									catch (Exception e)    {
-										System.out.println("Exception on unlock\n" + e.getMessage());
-									}
-								}
-								else {
-									// some other transaction still has a lock on
-									// the data item just unlocked. So, WRITE lock
-									// cannot be granted.
+							// get all other transactions which have locks on the data item just unlocked.
+							final Vector vect1 = this.lockTable.elements(dataObj);
+							// remove interrupted thread from waitTable only if no other transaction has locked this data item
+							boolean canUnlock = true;
+							for (int k = 0; k < vect1.size(); k++) {
+								dataObj2 = (DataObj) vect1.elementAt(k);
+								if (waitObj.getXId() != dataObj2.getXId()) {
+									canUnlock = false;
 									break;
 								}
 							}
-
-							// stop granting READ locks as soon as you find a WRITE lock
-							// request in the queue of requests
+							if (canUnlock) {
+								for (int k = 0; k < vect1.size(); k++) {
+									dataObj2 = (DataObj) vect1.elementAt(k);
+									if (dataObj2.getLockType() == LockManager.READ) {
+										final TrxnObj equiv = new TrxnObj(dataObj2.getXId(), dataObj2.getDataName(), dataObj2
+												.getLockType());
+										this.lockTable.remove(dataObj2);
+										this.lockTable.remove(equiv);
+									}
+								}
+								this.waitTable.remove(waitObj);
+								try {
+									synchronized (waitObj.getThread()) {
+										waitObj.getThread().notify();
+									}
+								} catch (final Exception e) {
+									System.out.println("Exception on unlock\n" + e.getMessage());
+								}
+							} else {
+								System.out.println(vect1.elementAt(0));
+								// some other transaction still has a lock on the data item just unlocked. So, WRITE lock
+								// cannot be granted.
+								break;
+							}
+							// stop granting READ locks as soon as you find a WRITE lock request in the queue of requests
 							break;
 						} else if (waitObj.getLockType() == LockManager.READ) {
 							// remove interrupted thread from waitTable.
 							this.waitTable.remove(waitObj);
-
 							try {
 								synchronized (waitObj.getThread()) {
 									waitObj.getThread().notify();
 								}
-							}
-							catch (Exception e) {
+							} catch (final Exception e) {
 								System.out.println("Exception e\n" + e.getMessage());
 							}
 						}
