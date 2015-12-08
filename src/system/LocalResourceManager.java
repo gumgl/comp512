@@ -22,7 +22,8 @@ public class LocalResourceManager extends ResourceManager {
 
 	public LocalResourceManager(ResourceManager.Type type) {
 		this.type = type;
-		this.storagePath = "./persistent/" + type.name().toLowerCase() + "/";
+		this.storagePath = "C:\\Users\\Guillaume\\git\\comp512\\persistent\\"+type.name().toLowerCase()+"\\";
+		//this.storagePath = "./persistent/" + type.name().toLowerCase() + "/";
 		TM  = new TransactionManager(this);
 
 		loadItemsDB();
